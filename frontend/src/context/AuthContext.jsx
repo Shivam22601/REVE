@@ -54,6 +54,9 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.login({ email, password });
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
         setToken(response.accessToken);
         setUser(response.user);
         return { success: true, user: response.user };
@@ -69,6 +72,9 @@ export const AuthProvider = ({ children }) => {
       const response = await authAPI.googleLogin(googleToken);
       if (response.accessToken) {
         localStorage.setItem('accessToken', response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem('refreshToken', response.refreshToken);
+        }
         setToken(response.accessToken);
         setUser(response.user);
         return { success: true, user: response.user };
@@ -95,6 +101,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Logout error:', error);
     } finally {
       localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
       setToken(null);
       setUser(null);
     }

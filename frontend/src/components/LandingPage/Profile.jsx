@@ -63,7 +63,7 @@ export default function Profile() {
         <div className="flex items-center gap-4 mb-6">
           <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
             {user.avatar ? (
-                <img src={user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
+                <img src={user.avatar.url || user.avatar} alt={user.name} className="w-full h-full rounded-full object-cover" />
             ) : (
                 <User size={32} />
             )}

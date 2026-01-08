@@ -33,10 +33,18 @@ const apiCall = async (endpoint, options = {}) => {
     // If unauthorized, try refreshing token once and retry the original request
     if (response.status === 401) {
       try {
-        const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, { method: 'POST', credentials: 'include' });
+        const rt = localStorage.getItem('refreshToken');
+        const refreshRes = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+          headers: rt ? { Authorization: `Bearer ${rt}` } : {}
+        });
         const refreshData = await refreshRes.json().catch(() => ({}));
         if (refreshRes.ok && refreshData.accessToken) {
           localStorage.setItem('accessToken', refreshData.accessToken);
+          if (refreshData.refreshToken) {
+            localStorage.setItem('refreshToken', refreshData.refreshToken);
+          }
           token = refreshData.accessToken;
           config = makeConfig(token);
           // retry original request once
@@ -47,9 +55,11 @@ const apiCall = async (endpoint, options = {}) => {
         }
         // refresh failed => clear tokens and propagate a session-expired style error
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         throw new Error(refreshData.message || 'Session expired');
       } catch (refreshErr) {
         localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
         console.error('Refresh failed:', refreshErr);
         throw refreshErr;
       }
