@@ -11,7 +11,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const setAuthCookies = (res, accessToken, refreshToken) => {
   const cookieOpts = {
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: process.env.NODE_ENV === 'production'
   };
   res.cookie('accessToken', accessToken, { ...cookieOpts, maxAge: 15 * 60 * 1000 });
