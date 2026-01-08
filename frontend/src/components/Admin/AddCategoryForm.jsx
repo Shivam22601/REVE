@@ -46,7 +46,7 @@ const AddCategoryForm = ({ categories = [], onCreated }) => {
           className="bg-pink-600 text-white py-2 px-4 rounded hover:bg-pink-700 disabled:opacity-50"
           disabled={loading}
         >
-          {loading ? 'Saving...' : (initialData ? 'Update' : 'Create')}
+          {loading ? 'Saving...' : 'Create'}
         </button>
       </div>
     </form>
