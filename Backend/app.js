@@ -31,6 +31,7 @@ app.use(
   })
 );
 app.use(helmet());
+app.use(compression());
 app.use(morgan('dev'));
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true }));
@@ -52,6 +53,22 @@ if (paymentRoutes) {
   app.use('/api/payments', paymentRoutes);
 }
 app.use('/api/admin', adminRoutes);
+
+// Serve frontend static files
+const frontendPath = path.join(__dirname, '../frontend/dist');
+app.use(express.static(frontendPath));
+
+// Handle SPA routing - return index.html for any unknown route that is NOT an API route
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
+    if (err) {
+      next(err);
+    }
+  });
+});
 
 app.use(notFound);
 app.use(errorHandler);

@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon server.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node server.js"
+    "start": "node server.js",
+    "build": "npm install && npm install --prefix ../frontend && npm run build --prefix ../frontend"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
     "bcrypt": "^6.0.0",
     "brcypt": "^1.0.1",
     "cloudinary": "^2.8.0",
+    "compression": "^1.8.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",

@@ -39,6 +39,12 @@ productSchema.pre('save', function setSlug() {
 
 });
 
+// Indexes for performance
+productSchema.index({ name: 1 });
+productSchema.index({ category: 1 });
+productSchema.index({ price: 1 });
+productSchema.index({ createdAt: -1 });
+
 module.exports = mongoose.model('Product', productSchema);
 
 

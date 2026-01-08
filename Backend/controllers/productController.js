@@ -42,10 +42,13 @@ const listProducts = asyncHandler(async (req, res) => {
 
   const [items, count] = await Promise.all([
     Product.find(filter)
-      .populate('category subCategory')
+      .select('name price salePrice images averageRating totalReviews slug category') // Select only needed fields
+      .populate('category', 'name') // Populate only name
+      .populate('subCategory', 'name')
       .sort(sort)
       .skip((page - 1) * limit)
-      .limit(limit),
+      .limit(limit)
+      .lean(), // Use lean() for faster read-only queries
     Product.countDocuments(filter)
   ]);
 
