@@ -4,6 +4,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
+const compression = require('compression');
 
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
