@@ -132,8 +132,12 @@ const forgotPassword = asyncHandler(async (req, res) => {
   await user.save();
 
   const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
-  await sendResetEmail(user, resetLink);
-  res.json({ message: 'Reset email sent' });
+  try {
+    await sendResetEmail(user, resetLink);
+    res.json({ message: 'Reset email sent' });
+  } catch (_err) {
+    res.status(202).json({ message: 'We will email you if the address is registered' });
+  }
 });
 
 const resetPassword = asyncHandler(async (req, res) => {

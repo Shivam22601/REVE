@@ -20,7 +20,9 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: emailUser,
     pass: emailPass
-  }
+  },
+  connectionTimeout: 30000,
+  greetingTimeout: 30000
 });
 
 // Verify SMTP connection

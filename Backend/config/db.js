@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const connectDb = async () => {
-  const uri = process.env.MONGODB_URI ||  "mongodb://127.0.0.1:27017/ReveCult ";
+  const uri = (process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ReveCult').trim();
 
   if (!uri) {
     throw new Error('MONGODB_URI is not set');
@@ -9,7 +9,10 @@ const connectDb = async () => {
 
   try {
     await mongoose.connect(uri, {
-      serverSelectionTimeoutMS: 10000
+      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000,
+      socketTimeoutMS: 45000
     });
     console.log('MongoDB connected');
   } catch (err) {
