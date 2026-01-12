@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -61,14 +62,16 @@ app.use('/api/admin', adminRoutes);
 const frontendPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendPath));
 
-app.get((req, res, next) => {
+app.get(/^(?!\/api).*/, (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }
-  res.sendFile(path.join(frontendPath, 'index.html'), (err) => {
-    if (err) {
-      next(err);
-    }
+  const indexPath = path.join(frontendPath, 'index.html');
+  if (!fs.existsSync(indexPath)) {
+    return next();
+  }
+  res.sendFile(indexPath, (err) => {
+    if (err) next(err);
   });
 });
 

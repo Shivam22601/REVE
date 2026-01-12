@@ -124,7 +124,7 @@ const logout = asyncHandler(async (req, res) => {
 const forgotPassword = asyncHandler(async (req, res) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
-  if (!user) return res.status(200).json({ message: 'If registered, email will be sent' });
+  if (!user) return res.status(200).json({ message: 'We will email you if the address is registered' });
 
   const resetToken = crypto.randomBytes(32).toString('hex');
   user.resetToken = resetToken;
@@ -134,9 +134,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
   const resetLink = `${process.env.CLIENT_URL}/reset-password?token=${resetToken}`;
   try {
     await sendResetEmail(user, resetLink);
-    res.json({ message: 'Reset email sent' });
+    res.status(200).json({ message: 'We will email you if the address is registered' });
   } catch (_err) {
-    res.status(202).json({ message: 'We will email you if the address is registered' });
+    res.status(200).json({ message: 'We will email you if the address is registered' });
   }
 });
 
