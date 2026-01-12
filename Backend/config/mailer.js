@@ -1,84 +1,35 @@
-const sgMail = require('@sendgrid/mail');
+const nodemailer = require('nodemailer');
 
-const sendgridApiKey =
-  typeof process.env.SENDGRID_API_KEY === 'string'
-    ? process.env.SENDGRID_API_KEY.trim()
-    : '';
+const emailUser = process.env.EMAIL_USER;
+const emailPass = process.env.EMAIL_PASS;
+const emailHost = process.env.EMAIL_HOST || 'smtp.gmail.com';
+const emailPort = parseInt(process.env.EMAIL_PORT || '587');
 
-const fromRaw =
-  typeof process.env.EMAIL_FROM === 'string'
-    ? process.env.EMAIL_FROM.trim()
-    : '';
-
-if (!sendgridApiKey) {
-  throw new Error('SENDGRID_API_KEY is missing');
-}
-
-if (!fromRaw) {
-  throw new Error('EMAIL_FROM is missing');
-}
-
-// extract email if "Name <email@domain.com>"
-const extractFrom = (from) => {
-  const match = from.match(/^(?:"?([^"]*)"?\s*)?<([^>]+)>$/);
-  if (match) {
-    return {
-      name: match[1] || undefined,
-      email: match[2]
-    };
-  }
-  return { email: from };
-};
-
-const fromParsed = extractFrom(fromRaw);
-
-const fromDomain = fromParsed.email.split('@').pop().toLowerCase();
-if (fromDomain === 'gmail.com' || fromDomain === 'googlemail.com') {
-  throw new Error(
-    'SendGrid does not allow gmail.com as FROM address. Use a verified domain.'
-  );
-}
-
-sgMail.setApiKey(sendgridApiKey);
-
-const transporter = {
-  provider: 'sendgrid',
-
-  sendMail: async ({ to, subject, text, html, from }) => {
-    const toList = Array.isArray(to) ? to : [to];
-
-    try {
-      const [response] = await sgMail.send({
-        to: toList,
-        from: from ? extractFrom(from) : fromParsed,
-        subject,
-        text,
-        html
-      });
-
-      return {
-        accepted: toList,
-        rejected: [],
-        messageId:
-          response?.headers?.['x-message-id'] ||
-          response?.headers?.['x-sendgrid-message-id'],
-        statusCode: response?.statusCode
-      };
-    } catch (err) {
-      const status = err?.code || err?.response?.statusCode;
-      const errors = err?.response?.body?.errors;
-      const details =
-        Array.isArray(errors) && errors.length
-          ? JSON.stringify(errors)
-          : err.message;
-
-      throw new Error(
-        `SendGrid send failed${status ? ` (${status})` : ''}: ${details}`
-      );
+if (!emailUser || !emailPass) {
+  module.exports = {
+    provider: 'smtp',
+    sendMail: async () => {
+      throw new Error('SMTP credentials missing. Set EMAIL_USER and EMAIL_PASS.');
+    },
+    verify: (cb) => cb && cb(new Error('SMTP credentials missing.'))
+  };
+} else {
+  const transporter = nodemailer.createTransport({
+    host: emailHost,
+    port: emailPort,
+    secure: emailPort === 465,
+    auth: {
+      user: emailUser,
+      pass: emailPass
+    },
+    connectionTimeout: 30000,
+    greetingTimeout: 30000
+  });
+  transporter.provider = 'smtp';
+  transporter.verify((err) => {
+    if (err) {
+      console.error('Email server connection failed:', err.message);
     }
-  },
-
-  verify: (cb) => cb && cb(null, true)
-};
-
-module.exports = transporter;
+  });
+  module.exports = transporter;
+}
