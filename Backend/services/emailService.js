@@ -1,22 +1,30 @@
-require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
-
-const transporter = require('../config/mailer');
 const {
   verificationEmail,
   resetPasswordEmail,
   orderConfirmationEmail
 } = require('../utils/emailTemplates');
 
-const rawFrom = process.env.EMAIL_FROM || process.env.EMAIL_USER;
-const FROM_EMAIL = rawFrom && rawFrom.includes('<') ? rawFrom : `"Revecult" <${rawFrom}>`;
+let cachedTransporter;
+const getTransporter = () => {
+  if (!cachedTransporter) {
+    cachedTransporter = require('../config/mailer');
+  }
+  return cachedTransporter;
+};
+
+const getFromEmail = () => {
+  const rawFrom = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+  return rawFrom && rawFrom.includes('<') ? rawFrom : `"Revecult" <${rawFrom}>`;
+};
 
 const sendVerificationEmail = async (user, link) => {
   const mail = verificationEmail(user.name, link);
 
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail({
       to: user.email,
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       subject: mail.subject,
       text: mail.text,
       html: mail.html
@@ -42,9 +50,10 @@ const sendResetEmail = async (user, link) => {
   const mail = resetPasswordEmail(user.name, link);
 
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail({
       to: user.email,
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       subject: mail.subject,
       text: mail.text,
       html: mail.html
@@ -70,9 +79,10 @@ const sendOrderConfirmation = async (user, order) => {
   const mail = orderConfirmationEmail(user.name, order);
 
   try {
+    const transporter = getTransporter();
     const info = await transporter.sendMail({
       to: user.email,
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       subject: mail.subject,
       text: mail.text,
       html: mail.html
@@ -101,6 +111,8 @@ module.exports = {
 };
 
 if (require.main === module) {
+  require('dotenv').config({ path: require('path').join(__dirname, '..', '.env'), quiet: true });
+
   const args = process.argv.slice(2);
   const getArg = (key) => {
     const idx = args.indexOf(key);
@@ -112,6 +124,7 @@ if (require.main === module) {
 
   const to = getArg('--to') || process.env.TEST_EMAIL_TO;
   const subject = getArg('--subject') || 'Email self-test';
+  const transporter = getTransporter();
   const text = getArg('--text') || `Provider: ${transporter.provider || 'unknown'}`;
   const html = getArg('--html') || `<p>Provider: <strong>${transporter.provider || 'unknown'}</strong></p>`;
 
@@ -123,7 +136,7 @@ if (require.main === module) {
   transporter
     .sendMail({
       to,
-      from: FROM_EMAIL,
+      from: getFromEmail(),
       subject,
       text,
       html
