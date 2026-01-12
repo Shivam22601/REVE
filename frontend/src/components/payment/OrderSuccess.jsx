@@ -5,46 +5,46 @@ import { motion } from "framer-motion";
 import { useCart } from "../LandingPage/CartContext";
 
 export default function OrderSuccess() {
+  const Motion = motion;
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
   const orderNumber = location.state?.orderNumber;
 
   useEffect(() => {
-    // clearCart should be idempotent; also sometimes we clear it when navigating here
-    clearCart?.(); // 🧹 clear cart after order
+    clearCart();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, []);
+  }, [clearCart]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white px-6">
-      <motion.div
+      <Motion.div
         initial={{ scale: 0.6, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
         className="bg-white p-10 rounded-3xl shadow-xl max-w-md w-full text-center"
       >
         {/* ✅ Animated Icon */}
-        <motion.div
+        <Motion.div
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
           className="flex justify-center mb-6"
         >
           <CheckCircle size={80} className="text-green-600" />
-        </motion.div>
+        </Motion.div>
 
         {/* 🎉 Text */}
-        <motion.h1
+        <Motion.h1
           initial={{ y: 20, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.5 }}
           className="text-3xl font-bold mb-3"
         >
           Order Placed Successfully!
-        </motion.h1>
+        </Motion.h1>
 
-        <motion.p
+        <Motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
@@ -56,10 +56,10 @@ export default function OrderSuccess() {
           {orderNumber && (
             <div className="mt-3 font-medium text-gray-700">Order Number: <span className="text-pink-600">{orderNumber}</span></div>
           )}
-        </motion.p>
+        </Motion.p>
 
         {/* 🎯 Buttons */}
-        <motion.div
+        <Motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
@@ -78,8 +78,8 @@ export default function OrderSuccess() {
           >
             Go to Home
           </button>
-        </motion.div>
-      </motion.div>
+        </Motion.div>
+      </Motion.div>
     </div>
   );
 }

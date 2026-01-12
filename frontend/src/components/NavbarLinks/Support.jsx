@@ -13,6 +13,7 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Support() {
+  const Motion = motion;
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [formData, setFormData] = useState({
@@ -87,25 +88,25 @@ export default function Support() {
 
       {/* HERO SECTION */}
       <section className="py-24 px-6 text-center border-b bg-gradient-to-br from-[#EDE7FF] via-[#FBE8F4] to-white">
-        <motion.h1
+        <Motion.h1
           className="text-4xl md:text-6xl font-extrabold tracking-tight text-gray-900"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
         >
           Support Center
-        </motion.h1>
+        </Motion.h1>
 
-        <motion.p
+        <Motion.p
           className="text-gray-600 text-lg mt-4 max-w-2xl mx-auto"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           We’re here for you — calm, clear, pastel-soft support for every REVE CULT user.
-        </motion.p>
+        </Motion.p>
 
         {/* Search Bar */}
-        <motion.div
+        <Motion.div
           className="relative max-w-xl mx-auto mt-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -139,7 +140,7 @@ export default function Support() {
           {/* Search Results */}
           <AnimatePresence>
             {showSearchResults && (
-              <motion.div
+              <Motion.div
                 initial={{ opacity: 0, y: -6 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}
@@ -162,16 +163,16 @@ export default function Support() {
                     No results found for "{searchQuery}"
                   </p>
                 )}
-              </motion.div>
+              </Motion.div>
             )}
           </AnimatePresence>
-        </motion.div>
+        </Motion.div>
       </section>
 
       {/* SUPPORT OPTIONS */}
       <section className="max-w-6xl mx-auto px-6 py-20 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {supportOptions.map((opt, i) => (
-          <motion.div
+          <Motion.div
             key={i}
             className="p-6 rounded-2xl border bg-white shadow-sm hover:shadow-md hover:shadow-purple-100 transition cursor-pointer"
             whileHover={{ scale: 1.03 }}
@@ -182,7 +183,7 @@ export default function Support() {
             <button className="mt-4 text-purple-600 font-medium">
               {opt.action} →
             </button>
-          </motion.div>
+          </Motion.div>
         ))}
       </section>
 
@@ -245,13 +246,13 @@ export default function Support() {
           className="w-full border rounded-2xl p-4 mt-2 bg-[#F6F4FF] outline-none focus:ring-2 focus:ring-purple-300 shadow-sm"
         />
 
-        <motion.button
+        <Motion.button
           whileHover={{ scale: 1.02 }}
           className="mt-6 bg-gradient-to-r from-purple-600 to-pink-500 text-white px-10 py-4 rounded-full font-semibold shadow-md hover:shadow-lg"
         >
           <Send className="inline w-5 h-5 mr-2" />
           Send Message
-        </motion.button>
+        </Motion.button>
 
         <div className="mt-10 flex items-center gap-3 text-gray-600">
           <Clock className="w-5 h-5 text-purple-500" />

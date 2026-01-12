@@ -1,7 +1,7 @@
 import { User, LogOut, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import AddressForm from "./AddressForm";
 import { userAPI } from "../../config/api";
 import OrderDetailsModal from "../Admin/OrderDetailsModal";
@@ -15,7 +15,7 @@ export default function Profile() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
-  const loadOrders = async () => {
+  const loadOrders = useCallback(async () => {
     if (!user) return;
     setOrdersLoading(true);
     try {
@@ -28,7 +28,7 @@ export default function Profile() {
     } finally {
       setOrdersLoading(false);
     }
-  };
+  }, [user]);
 
   useEffect(() => {
     if (!user) {
@@ -40,7 +40,7 @@ export default function Profile() {
     // load orders for the user when profile is available
     loadOrders();
 
-  }, [user, navigate]);
+  }, [user, loadOrders]);
 
   if (!user) {
     return (

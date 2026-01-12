@@ -7,12 +7,6 @@ import cultVideo from "../../assets/j1.mp4";
 export default function JoinTheCult() {
   const navigate = useNavigate();
 
-  const handleJoin = () => {
-    const user = localStorage.getItem("user");
-    navigate(user ? "/profile" : "/login");
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   return (
     <div className="w-full mt-16 px-6">
       <div className="max-w-7xl mx-auto">

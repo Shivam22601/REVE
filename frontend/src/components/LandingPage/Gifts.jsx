@@ -1,6 +1,6 @@
 import React from 'react';
 export default function GiftGuideSection() {
-  const Gifts = [
+  const gifts = [
     {
       title: 'Birthday Bundle',
       price: '$299',

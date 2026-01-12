@@ -1,5 +1,4 @@
 import { useState, memo, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Star, ArrowLeft, Sparkles, Heart } from "lucide-react";
 import { useCart } from "../LandingPage/CartContext";
 import { useWishlist } from "../LandingPage/WishlistContext";
@@ -12,7 +11,6 @@ const ProductCard = memo(
     product,
     onAddToCart,
     onToggleWishlist,
-    onViewDetails,
     isAdded,
     isWishlisted,
     isHovered,
@@ -117,7 +115,6 @@ ProductCard.displayName = "ProductCard";
 
 /* ================= SHOP PAGE ================= */
 export default function Shop() {
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [addedToCart, setAddedToCart] = useState({});
   const [hoveredProduct, setHoveredProduct] = useState(null);
 
@@ -211,6 +208,10 @@ export default function Shop() {
       </div>
 
       {/* PRODUCTS GRID */}
+      <div className="max-w-7xl mx-auto px-6 pb-6">
+        {loading && <div className="text-center text-gray-600">Loading...</div>}
+        {!loading && error && <div className="text-center text-red-600">{error}</div>}
+      </div>
       <div className="max-w-7xl mx-auto px-6 pb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {items.map((p) => {
           const product = normalize(p);
@@ -220,7 +221,6 @@ export default function Shop() {
               product={product}
               onAddToCart={() => handleAddToCart(product)}
               onToggleWishlist={() => toggleWishlist(product)}
-              onViewDetails={() => setSelectedProduct(product)}
               isAdded={!!addedToCart[product.id]}
               isWishlisted={isWishlisted(product.id)}
               isHovered={hoveredProduct === product.id}

@@ -1,3 +1,5 @@
+require('dotenv').config({ path: require('path').join(__dirname, '..', '.env') });
+
 const transporter = require('../config/mailer');
 const {
   verificationEmail,
@@ -5,7 +7,8 @@ const {
   orderConfirmationEmail
 } = require('../utils/emailTemplates');
 
-const FROM_EMAIL = `"Revecult" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`;
+const rawFrom = process.env.EMAIL_FROM || process.env.EMAIL_USER;
+const FROM_EMAIL = rawFrom && rawFrom.includes('<') ? rawFrom : `"Revecult" <${rawFrom}>`;
 
 const sendVerificationEmail = async (user, link) => {
   const mail = verificationEmail(user.name, link);
@@ -23,7 +26,9 @@ const sendVerificationEmail = async (user, link) => {
       to: user.email,
       accepted: info.accepted,
       rejected: info.rejected,
-      messageId: info.messageId
+      messageId: info.messageId,
+      provider: transporter.provider,
+      statusCode: info.statusCode
     });
 
     return info;
@@ -49,7 +54,9 @@ const sendResetEmail = async (user, link) => {
       to: user.email,
       accepted: info.accepted,
       rejected: info.rejected,
-      messageId: info.messageId
+      messageId: info.messageId,
+      provider: transporter.provider,
+      statusCode: info.statusCode
     });
 
     return info;
@@ -75,7 +82,9 @@ const sendOrderConfirmation = async (user, order) => {
       to: user.email,
       accepted: info.accepted,
       rejected: info.rejected,
-      messageId: info.messageId
+      messageId: info.messageId,
+      provider: transporter.provider,
+      statusCode: info.statusCode
     });
 
     return info;
@@ -90,3 +99,52 @@ module.exports = {
   sendResetEmail,
   sendOrderConfirmation
 };
+
+if (require.main === module) {
+  const args = process.argv.slice(2);
+  const getArg = (key) => {
+    const idx = args.indexOf(key);
+    if (idx === -1) return undefined;
+    const val = args[idx + 1];
+    if (!val || val.startsWith('--')) return undefined;
+    return val;
+  };
+
+  const to = getArg('--to') || process.env.TEST_EMAIL_TO;
+  const subject = getArg('--subject') || 'Email self-test';
+  const text = getArg('--text') || `Provider: ${transporter.provider || 'unknown'}`;
+  const html = getArg('--html') || `<p>Provider: <strong>${transporter.provider || 'unknown'}</strong></p>`;
+
+  if (!to) {
+    console.error('Missing --to <email> (or set TEST_EMAIL_TO).');
+    process.exit(2);
+  }
+
+  transporter
+    .sendMail({
+      to,
+      from: FROM_EMAIL,
+      subject,
+      text,
+      html
+    })
+    .then((info) => {
+      console.log('Email self-test sent', {
+        to,
+        accepted: info.accepted,
+        rejected: info.rejected,
+        messageId: info.messageId,
+        provider: transporter.provider,
+        statusCode: info.statusCode
+      });
+      process.exit(0);
+    })
+    .catch((err) => {
+      console.error('Email self-test failed', {
+        to,
+        provider: transporter.provider,
+        message: err?.message || String(err)
+      });
+      process.exit(1);
+    });
+}

@@ -16,12 +16,10 @@ const Navbar2 = () => {
   const [mobileSearch, setMobileSearch] = useState(false);
   const [query, setQuery] = useState("");
   const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     let mounted = true;
-    setLoading(true);
     productAPI
       .getProducts({ limit: 100 })
       .then((res) => {
@@ -29,7 +27,6 @@ const Navbar2 = () => {
         setItems((res && res.data) || []);
       })
       .catch(() => {})
-      .finally(() => mounted && setLoading(false));
 
     return () => (mounted = false);
   }, []);

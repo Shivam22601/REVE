@@ -6,6 +6,7 @@ import { Sparkles } from "lucide-react";
 import products from "../../components/products";
 
 export default function Earbuds() {
+  const Motion = motion;
   return (
     <div className="min-h-screen bg-white text-gray-900">
 
@@ -15,26 +16,26 @@ export default function Earbuds() {
         {/* Glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] bg-pink-300 opacity-20 blur-[200px] rounded-full" />
 
-        <motion.h1
+        <Motion.h1
           className="text-5xl md:text-7xl font-extrabold tracking-tight relative z-10"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
           Earbuds by <span className="text-purple-600">REVE CULT</span>
-        </motion.h1>
+        </Motion.h1>
 
-        <motion.p
+        <Motion.p
           className="text-gray-600 text-lg mt-4 max-w-2xl mx-auto relative z-10"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
           Aesthetic. Soft. Feminine. Designed for modern women who love identity in technology.
-        </motion.p>
+        </Motion.p>
 
         {/* Banner Image → first product image */}
         {products[0] && (
-          <motion.div
+          <Motion.div
             className="relative z-10 mt-10 flex justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -45,7 +46,7 @@ export default function Earbuds() {
               alt={products[0].name}
               className="w-[350px] md:w-[460px] drop-shadow-2xl"
             />
-          </motion.div>
+          </Motion.div>
         )}
       </section>
 
@@ -57,7 +58,7 @@ export default function Earbuds() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {products.map((item) => (
-            <motion.div
+            <Motion.div
               key={item.id}
               className="rounded-3xl overflow-hidden border bg-white shadow-md hover:shadow-xl transition cursor-pointer"
               whileHover={{ scale: 1.04 }}
@@ -80,7 +81,7 @@ export default function Earbuds() {
                   View Details
                 </button>
               </div>
-            </motion.div>
+            </Motion.div>
           ))}
         </div>
       </section>
@@ -89,15 +90,15 @@ export default function Earbuds() {
       <section className="px-6 py-24 bg-gradient-to-r from-[#F6F4FF] to-[#FFE8F7]">
         <div className="max-w-5xl mx-auto text-center">
 
-          <motion.h2
+          <Motion.h2
             className="text-4xl font-extrabold text-gray-900"
             initial={{ opacity: 0, y: 8 }}
             whileInView={{ opacity: 1, y: 0 }}
           >
             Aesthetic Sound Designed for Her
-          </motion.h2>
+          </Motion.h2>
 
-          <motion.p
+          <Motion.p
             className="text-gray-600 mt-6 text-lg leading-relaxed"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -105,15 +106,15 @@ export default function Earbuds() {
           >
             Every REVE CULT earbud is shaped with softness, identity,
             and feminine comfort in mind.
-          </motion.p>
+          </Motion.p>
 
-          <motion.p
+          <Motion.p
             className="text-gray-700 mt-4 text-lg"
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
           >
             🎀 <i>Her vibe. Her sound. Her identity.</i>
-          </motion.p>
+          </Motion.p>
         </div>
       </section>
     </div>

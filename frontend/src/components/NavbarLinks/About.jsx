@@ -9,7 +9,7 @@ import aboutBg from "../../assets/logo.jpg";
 
 const STORY_SETS = [
   {
-    key: "lifestyle",
+    key: "lifestyle", 
     title: "Lifestyle — Youth Girls",
     slides: [
       { text: "Why does tech still look boring?" },
@@ -41,6 +41,7 @@ const STORY_SETS = [
 ];
 
 export default function About() {
+  const Motion = motion;
   const [activeSet, setActiveSet] = useState(0);
   const [activeSlide, setActiveSlide] = useState(0);
 
@@ -81,22 +82,22 @@ export default function About() {
         <div className="absolute inset-0 bg-white/50" />
 
         <div className="relative z-10 max-w-4xl text-center">
-          <motion.h1
+          <Motion.h1
             className="text-4xl md:text-6xl font-extrabold"
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
           >
             About <span className="font-light text-gray-500">REVE CULT</span>
-          </motion.h1>
+          </Motion.h1>
 
-          <motion.p
+          <Motion.p
             className="mt-4 text-xl md:text-2xl text-gray-700"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
           >
             Her Sound. Her Style. Her Story.
-          </motion.p>
+          </Motion.p>
 
           {/* ONLY OUR STORY BUTTON LEFT IN HERO */}
           <div className="mt-10 flex justify-center">
@@ -207,7 +208,7 @@ export default function About() {
 
       {/* ================= STORY SLIDES ================= */}
       <section className="max-w-6xl mx-auto px-6 py-20">
-        <motion.div
+        <Motion.div
           key={`${activeSet}-${activeSlide}`}
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -233,7 +234,7 @@ export default function About() {
           >
             <ChevronRight />
           </button>
-        </motion.div>
+        </Motion.div>
       </section>
 
       {/* ================= TRIMAN CULT ================= */}

@@ -8,6 +8,7 @@ import img3 from "../../assets/f3.jpg";
 import img4 from "../../assets/f4.jpg";
 
 const Hero2 = () => {
+  const Motion = motion;
   const images = [img1, img2, img3, img4];
   const [current, setCurrent] = useState(0);
 
@@ -26,7 +27,7 @@ const Hero2 = () => {
       {/* Slider Container */}
       <div className="relative w-full h-[300px] sm:h-[550px] lg:h-[680px]">
         <AnimatePresence>
-          <motion.img
+          <Motion.img
             key={current}
             src={images[current]}
             alt={`banner-${current}`}

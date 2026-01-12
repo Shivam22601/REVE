@@ -14,7 +14,7 @@ const updateProfile = asyncHandler(async (req, res) => {
   if (req.file) {
     req.user.avatar = {
       url: req.file.path || req.file.secure_url,
-      publicId: req.file.filename || req.file.public_id
+      publicId: req.file.filename || req.file.public_id 
     };
   }
   await req.user.save();

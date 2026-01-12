@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { adminAPI } from '../../config/api';
 import { productAPI } from '../../config/api';
 
-const AdminProductForm = ({ onClose, onCreated }) => {
+const AdminProductForm = ({ onClose, onCreated, product }) => {
   const [name, setName] = useState('');
   const [price, setPrice] = useState('');
   const [features, setFeatures] = useState('');
@@ -24,6 +24,17 @@ const AdminProductForm = ({ onClose, onCreated }) => {
     };
     load();
   }, []);
+
+  useEffect(() => {
+    if (!product) return;
+    setName(product.name || '');
+    setPrice(product.price !== undefined ? String(product.price) : '');
+    setStock(product.stock !== undefined ? Number(product.stock) : 0);
+    setCategory(product.category?._id || product.category || '');
+    setFeatures(Array.isArray(product.features) ? product.features.join('\n') : (product.features || ''));
+    setImages([]);
+    setError('');
+  }, [product]);
 
   const handleFiles = (e) => {
     setImages(Array.from(e.target.files));
@@ -47,10 +58,14 @@ const AdminProductForm = ({ onClose, onCreated }) => {
 
     setLoading(true);
     try {
-      await adminAPI.createProduct(form);
+      if (product?._id) {
+        await adminAPI.updateProduct(product._id, form);
+      } else {
+        await adminAPI.createProduct(form);
+      }
       if (onCreated) onCreated();
     } catch (err) {
-      setError(err.message || 'Failed to create product');
+      setError(err.message || (product?._id ? 'Failed to update product' : 'Failed to create product'));
     } finally {
       setLoading(false);
     }
@@ -60,7 +75,7 @@ const AdminProductForm = ({ onClose, onCreated }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
       <div className="bg-white w-full max-w-2xl p-6 rounded shadow max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold">Add Product</h2>
+          <h2 className="text-xl font-semibold">{product?._id ? 'Edit Product' : 'Add Product'}</h2>
           <button onClick={onClose} className="text-gray-500 hover:text-gray-800">Close</button>
         </div>
         <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
@@ -119,7 +134,7 @@ const AdminProductForm = ({ onClose, onCreated }) => {
             disabled={loading}
             className="bg-pink-600 text-white py-2 rounded hover:bg-pink-700 disabled:opacity-50"
           >
-            {loading ? 'Creating...' : 'Create Product'}
+            {loading ? (product?._id ? 'Saving...' : 'Creating...') : (product?._id ? 'Save Changes' : 'Create Product')}
           </button>
         </form>
       </div>

@@ -9,6 +9,7 @@ import video2 from "../../assets/v2.mp4";
 import video3 from "../../assets/v3.mp4";
 
 export default function FeaturedProduct() {
+  const Motion = motion;
   const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -51,7 +52,7 @@ export default function FeaturedProduct() {
         {!loading && !error && items.map((item) => {
           const it = normalize(item);
           return (
-            <motion.div
+            <Motion.div
               key={it.id}
               onClick={() => navigate(`/product/${it.id}`)}
               className="group p-6 rounded-xl border bg-white cursor-pointer"
@@ -80,7 +81,7 @@ export default function FeaturedProduct() {
               >
                 VIEW DETAILS
               </button>
-            </motion.div>
+            </Motion.div>
           );
         })}
       </div>

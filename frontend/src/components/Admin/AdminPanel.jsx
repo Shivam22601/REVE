@@ -20,7 +20,6 @@ const AdminPanel = () => {
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [showAddCategory, setShowAddCategory] = useState(false);
-  const [editingCategory, setEditingCategory] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
@@ -354,7 +353,6 @@ const AdminPanel = () => {
               <h2 className="text-2xl font-bold text-gray-800">Categories</h2>
               <button
                 onClick={() => {
-                  setEditingCategory(null);
                   setShowAddCategory(true);
                 }}
                 className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700"
@@ -370,6 +368,7 @@ const AdminPanel = () => {
                     <th className="px-6 py-4 font-medium text-gray-500">Name</th>
                     <th className="px-6 py-4 font-medium text-gray-500">Parent</th>
                     <th className="px-6 py-4 font-medium text-gray-500">Slug</th>
+                    <th className="px-6 py-4 font-medium text-gray-500 text-right">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -378,6 +377,14 @@ const AdminPanel = () => {
                       <td className="px-6 py-4">{c.name}</td>
                       <td className="px-6 py-4">{c.parent?.name || '—'}</td>
                       <td className="px-6 py-4">{c.slug}</td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleDeleteCategory(c._id)}
+                          className="text-red-600 hover:underline"
+                        >
+                          Delete
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -445,8 +452,10 @@ const AdminPanel = () => {
           onClose={() => setShowAddProduct(false)} 
           onCreated={() => {
             setShowAddProduct(false);
+            setEditingProduct(null);
             loadProducts();
           }} 
+          product={editingProduct}
         />
       )}
 
