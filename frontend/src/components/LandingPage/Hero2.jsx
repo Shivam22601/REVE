@@ -6,9 +6,6 @@ import img1 from "../../assets/f1.jpg";
 import img2 from "../../assets/f2.jpg";
 import img3 from "../../assets/f3.jpg";
 import img4 from "../../assets/f4.jpg";
-import v1 from "../../assets/v1.mp4";
-import v2 from "../../assets/v2.mp4";
-import v3 from "../../assets/v3.mp4";
 
 const Hero2 = () => {
   const Motion = motion;

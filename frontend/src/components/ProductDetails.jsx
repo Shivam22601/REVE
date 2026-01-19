@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useWishlist } from "./LandingPage/WishlistContext";
 import { useCart } from "./LandingPage/CartContext";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -17,8 +18,8 @@ export default function ProductDetails() {
 
   // ✅ Cart & Wishlist
   const { addToCart } = useCart();
-  const { addToWishlist, removeFromWishlist, wishlist } =
-    useWishlist();
+  const { addToWishlist, removeFromWishlist, wishlist } = useWishlist();
+  const { user } = useAuth();
 
   // ✅ SAME AS SHOP.JSX
   const [addedToCart, setAddedToCart] = useState(false);
@@ -28,6 +29,11 @@ export default function ProductDetails() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [reviews, setReviews] = useState([]);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -37,7 +43,9 @@ export default function ProductDetails() {
       .getProduct(id)
       .then((res) => {
         if (!mounted) return;
-        const p = res && res.product ? res.product : res;
+        const p = res.product;
+        const reviewsData = res.reviews || [];
+        
         // Client-side fallback parsing: use p.features if present, otherwise try description or tags
         const parseDescToFeatures = (desc) => {
           if (!desc) return [];
@@ -53,11 +61,13 @@ export default function ProductDetails() {
           name: p.name,
           salePrice: p.salePrice ?? p.price,
           image: p.images?.[0]?.url || "/placeholder.png",
+          images: p.images,
           rating: p.averageRating,
           reviews: p.totalReviews,
           features: Array.isArray(p.features) && p.features.length ? p.features : (p.description ? parseDescToFeatures(p.description) : (p.tags || [])),
           description: p.description,
         });
+        setReviews(reviewsData);
       })
       .catch((err) => {
         if (!mounted) return;
@@ -100,6 +110,41 @@ export default function ProductDetails() {
     isWishlisted
       ? removeFromWishlist(product.id)
       : addToWishlist(product);
+  };
+
+  const handleSubmitReview = async (e) => {
+    e.preventDefault();
+    if (!reviewRating || !reviewComment.trim()) return;
+
+    setSubmittingReview(true);
+    try {
+      await productAPI.addReview(id, {
+        rating: reviewRating,
+        comment: reviewComment.trim()
+      });
+      
+      // Refresh product data to get updated reviews
+      const res = await productAPI.getProduct(id);
+      const p = res.product;
+      const reviewsData = res.reviews || [];
+      
+      setProduct(prev => ({
+        ...prev,
+        rating: p.averageRating,
+        reviews: p.totalReviews
+      }));
+      setReviews(reviewsData);
+      
+      // Reset form
+      setReviewRating(5);
+      setReviewComment('');
+      setShowReviewForm(false);
+    } catch (error) {
+      console.error('Failed to submit review:', error);
+      alert('Failed to submit review. Please try again.');
+    } finally {
+      setSubmittingReview(false);
+    }
   };
 
   return (
@@ -234,7 +279,92 @@ export default function ProductDetails() {
                 ? "Remove from Wishlist"
                 : "Add to Wishlist"}
             </button>
+        </div>
+      </div>      </div>
+      {/* REVIEWS SECTION */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-bold">Customer Reviews ({reviews.length})</h2>
+          {user && (
+            <button
+              onClick={() => setShowReviewForm(!showReviewForm)}
+              className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition"
+            >
+              {showReviewForm ? 'Cancel' : 'Write a Review'}
+            </button>
+          )}
+        </div>
+
+        {/* REVIEW FORM */}
+        {showReviewForm && user && (
+          <div className="bg-gray-50 p-6 rounded-lg mb-8">
+            <h3 className="text-lg font-semibold mb-4">Write Your Review</h3>
+            <form onSubmit={handleSubmitReview}>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Rating</label>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setReviewRating(star)}
+                      className="text-2xl"
+                    >
+                      <Star
+                        className={star <= reviewRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                      />
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Comment</label>
+                <textarea
+                  value={reviewComment}
+                  onChange={(e) => setReviewComment(e.target.value)}
+                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
+                  rows="4"
+                  placeholder="Share your thoughts about this product..."
+                  required
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={submittingReview}
+                className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submittingReview ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </form>
           </div>
+        )}
+
+        {/* REVIEWS LIST */}
+        <div className="space-y-6">
+          {reviews.length === 0 ? (
+            <p className="text-gray-500 text-center py-8">No reviews yet. Be the first to review this product!</p>
+          ) : (
+            reviews.map((review) => (
+              <div key={review._id} className="border-b pb-6">
+                <div className="flex items-center gap-2 mb-2">
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        size={16}
+                        className={star <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
+                      />
+                    ))}
+                  </div>
+                  <span className="font-semibold">{review.user.name}</span>
+                  <span className="text-gray-500 text-sm">
+                    {new Date(review.createdAt).toLocaleDateString()}
+                  </span>
+                </div>
+                <p className="text-gray-700">{review.comment}</p>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>

@@ -104,6 +104,7 @@ export const productAPI = {
   },
   getProduct: (id) => apiCall(`/products/${id}`),
   getCategories: () => apiCall('/products/categories'),
+  addReview: (productId, reviewData) => apiCall(`/products/${productId}/reviews`, { method: 'POST', body: reviewData }),
 };
 
 // Cart API

@@ -208,6 +208,69 @@ export default function Support() {
         </div>
       </section>
 
+      {/* RETURN POLICY */}
+      <section className="max-w-5xl mx-auto px-6 py-10">
+        <h2 className="text-3xl font-bold mb-8 flex items-center gap-2 text-gray-900">
+          <Book className="text-purple-500" /> Return Policy
+        </h2>
+
+        <div className="bg-[#FAF7FF] border border-purple-100 rounded-2xl p-8 shadow-sm">
+          <div className="space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">30-Day Return Window</h3>
+              <p className="text-gray-700">
+                We offer a 30-day return policy for all REVE CULT products. If you're not completely satisfied with your purchase,
+                you can return it within 30 days of delivery for a full refund or exchange.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Return Conditions</h3>
+              <ul className="text-gray-700 space-y-2 ml-4">
+                <li>• Items must be in their original condition and packaging</li>
+                <li>• Tags must be attached and items unworn</li>
+                <li>• Returns must include the original receipt or order confirmation</li>
+                <li>• Personal care items and underwear cannot be returned for hygiene reasons</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">How to Return</h3>
+              <ol className="text-gray-700 space-y-2 ml-4">
+                <li>1. Contact our support team at support@revecult.com with your order number</li>
+                <li>2. Receive a return authorization and prepaid shipping label</li>
+                <li>3. Pack the item securely in its original packaging</li>
+                <li>4. Ship the package using the provided label</li>
+                <li>5. Refund will be processed within 5-7 business days after receipt</li>
+              </ol>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Exchanges</h3>
+              <p className="text-gray-700">
+                We offer exchanges for different sizes or colors. Exchange requests must be made within 30 days of delivery.
+                Shipping costs for exchanges may apply depending on the circumstances.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">Damaged or Defective Items</h3>
+              <p className="text-gray-700">
+                If you receive a damaged or defective item, please contact us immediately. We'll arrange for a replacement
+                or full refund at no cost to you.
+              </p>
+            </div>
+
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <p className="text-purple-800 font-medium">
+                <strong>Note:</strong> Custom or personalized items are not eligible for returns unless damaged or defective.
+                All returns are subject to inspection upon receipt.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* CONTACT FORM */}
       <section className="max-w-5xl mx-auto px-6 py-20">
         <h2 className="text-3xl font-bold mb-4 text-gray-900">Still need help?</h2>
