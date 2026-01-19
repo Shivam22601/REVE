@@ -217,9 +217,9 @@ export default function Support() {
         <div className="bg-[#FAF7FF] border border-purple-100 rounded-2xl p-8 shadow-sm">
           <div className="space-y-6">
             <div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-3">30-Day Return Window</h3>
+              <h3 className="text-xl font-semibold text-gray-900 mb-3">7-Day Return Window</h3>
               <p className="text-gray-700">
-                We offer a 30-day return policy for all REVE CULT products. If you're not completely satisfied with your purchase,
+                We offer a 7-day return policy for all REVE CULT products. If you're not completely satisfied with your purchase,
                 you can return it within 30 days of delivery for a full refund or exchange.
               </p>
             </div>

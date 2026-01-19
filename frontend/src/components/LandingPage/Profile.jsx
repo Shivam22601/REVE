@@ -2,11 +2,15 @@ import { User, LogOut, LayoutDashboard } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import { useCallback, useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import AddressForm from "./AddressForm";
 import { userAPI } from "../../config/api";
 import OrderDetailsModal from "../Admin/OrderDetailsModal";
+import aboutBg from "../../assets/logo.jpg";
+
 
 export default function Profile() {
+  const Motion = motion;
   const navigate = useNavigate();
   const { user, logout, isAdmin, refreshProfile } = useAuth();
   const [showAddressForm, setShowAddressForm] = useState(false);
@@ -43,18 +47,49 @@ export default function Profile() {
   }, [user, loadOrders]);
 
   if (!user) {
-    return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <p className="text-lg">Please login to view your profile</p>
-        <button 
-          onClick={() => navigate('/login')}
-          className="px-6 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 transition"
+  return (
+    <section className="relative min-h-[90vh] flex items-center justify-center px-6">
+      <img
+        src={aboutBg}
+        alt="Login Required"
+        className="absolute inset-0 w-full h-full object-contain"
+      />
+      <div className="absolute inset-0 bg-white/60" />
+
+      <div className="relative z-10 max-w-3xl text-center">
+        <Motion.h1
+          className="text-4xl md:text-6xl font-extrabold"
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
         >
-          Login
-        </button>
+          Welcome to <span className="font-light text-gray-500">REVE CULT</span>
+        </Motion.h1>
+
+        <Motion.p
+          className="mt-4 text-xl md:text-2xl text-gray-700"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.2 }}
+        >
+          Please login to view your profile
+        </Motion.p>
+
+        <div className="mt-10 flex justify-center">
+          <button
+            onClick={() => navigate("/login")}
+            className="px-6 py-3 rounded-full
+                       bg-pink-600 text-white font-semibold
+                       hover:bg-pink-700 transition
+                       text-sm sm:text-base"
+          >
+            Login
+          </button>
+        </div>
       </div>
-    );
-  }
+    </section>
+  );
+}
+
 
   return (
     <div className="min-h-screen px-6 py-16 max-w-4xl mx-auto">
