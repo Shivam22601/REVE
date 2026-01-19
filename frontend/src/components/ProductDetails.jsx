@@ -27,6 +27,7 @@ export default function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [selectedImage, setSelectedImage] = useState(0);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -112,13 +113,32 @@ export default function ProductDetails() {
       </button>
 
       <div className="grid md:grid-cols-2 gap-10 md:gap-14">
-        {/* IMAGE */}
-        <div className="bg-gray-100 p-6 sm:p-10 rounded-3xl flex items-center justify-center">
-          <img
-            src={product.image || "/placeholder.png"}
-            alt={product.name}
-            className="w-full max-h-[400px] object-contain"
-          />
+        {/* IMAGE GALLERY */}
+        <div className="bg-gray-100 p-6 sm:p-10 rounded-3xl">
+          <div className="flex flex-col items-center">
+            {/* Main Image */}
+            <img
+              src={product.images?.[selectedImage]?.url || product.image || "/placeholder.png"}
+              alt={product.name}
+              className="w-full max-h-[400px] object-contain mb-4"
+            />
+            {/* Thumbnails */}
+            {product.images && product.images.length > 1 && (
+              <div className="flex gap-2 overflow-x-auto">
+                {product.images.map((img, index) => (
+                  <img
+                    key={index}
+                    src={img.url}
+                    alt={`${product.name} ${index + 1}`}
+                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
+                      selectedImage === index ? 'border-pink-600' : 'border-gray-300'
+                    }`}
+                    onClick={() => setSelectedImage(index)}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* DETAILS */}

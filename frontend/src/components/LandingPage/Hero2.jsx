@@ -6,37 +6,63 @@ import img1 from "../../assets/f1.jpg";
 import img2 from "../../assets/f2.jpg";
 import img3 from "../../assets/f3.jpg";
 import img4 from "../../assets/f4.jpg";
+import v1 from "../../assets/v1.mp4";
+import v2 from "../../assets/v2.mp4";
+import v3 from "../../assets/v3.mp4";
 
 const Hero2 = () => {
   const Motion = motion;
-  const images = [img1, img2, img3, img4];
+  const media = [
+    { type: 'image', src: img1 },
+    { type: 'video', src: v1 },
+    { type: 'image', src: img2 },
+    { type: 'video', src: v2 },
+    { type: 'image', src: img3 },
+    { type: 'video', src: v3 },
+    { type: 'image', src: img4 }
+  ];
   const [current, setCurrent] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrent((prev) => (prev + 1) % images.length);
+      setCurrent((prev) => (prev + 1) % media.length);
     }, 4000);
     return () => clearInterval(timer);
-  }, [images.length]);
+  }, [media.length]);
 
-  const nextSlide = () => setCurrent((prev) => (prev + 1) % images.length);
-  const prevSlide = () => setCurrent((prev) => (prev - 1 + images.length) % images.length);
+  const nextSlide = () => setCurrent((prev) => (prev + 1) % media.length);
+  const prevSlide = () => setCurrent((prev) => (prev - 1 + media.length) % media.length);
 
   return (
     <section className="relative w-full bg-white overflow-hidden object-cover">
       {/* Slider Container */}
       <div className="relative w-full h-[300px] sm:h-[550px] lg:h-[680px]">
         <AnimatePresence>
-          <Motion.img
-            key={current}
-            src={images[current]}
-            alt={`banner-${current}`}
-            className="absolute w-full h-full object-contain overflow-hidden sm:rounded-xl"
-            initial={{ opacity: 0, scale: 1.05 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
-          />
+          {media[current].type === 'image' ? (
+            <Motion.img
+              key={current}
+              src={media[current].src}
+              alt={`banner-${current}`}
+              className="absolute w-full h-full object-contain overflow-hidden sm:rounded-xl"
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+            />
+          ) : (
+            <Motion.video
+              key={current}
+              src={media[current].src}
+              className="absolute w-full h-full object-cover overflow-hidden sm:rounded-xl"
+              autoPlay
+              muted
+              loop
+              initial={{ opacity: 0, scale: 1.05 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.8, ease: 'easeInOut' }}
+            />
+          )}
         </AnimatePresence>
 
         {/* Gradient overlay for better readability */}
@@ -58,7 +84,7 @@ const Hero2 = () => {
 
         {/* Dots Indicators */}
         <div className="absolute bottom-6 w-full flex justify-center gap-3">
-          {images.map((_, i) => (
+          {media.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrent(i)}

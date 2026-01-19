@@ -39,7 +39,7 @@ export default function Support() {
     {
       question: "Do you offer refunds?",
       answer:
-        "Yes! We offer a 30-day money-back guarantee on all REVE CULT products.",
+        "Yes! We offer a 7-day money-back guarantee on all REVE CULT products.",
       keywords: ["refund", "return"],
     },
     {
