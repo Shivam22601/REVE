@@ -14,11 +14,8 @@ const Hero2 = () => {
   const Motion = motion;
   const media = [
     { type: 'image', src: img1 },
-    { type: 'video', src: v1 },
     { type: 'image', src: img2 },
-    { type: 'video', src: v2 },
     { type: 'image', src: img3 },
-    { type: 'video', src: v3 },
     { type: 'image', src: img4 }
   ];
   const [current, setCurrent] = useState(0);
