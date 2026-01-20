@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Logo from "../../assets/logo.jpg";
 import { productAPI } from "../../config/api";
+import { useAuth } from "../../context/AuthContext";
 
 const Navbar2 = () => {
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -17,21 +18,17 @@ const Navbar2 = () => {
   const [query, setQuery] = useState("");
   const [items, setItems] = useState([]);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   useEffect(() => {
     let mounted = true;
     productAPI
       .getProducts({ limit: 100 })
-      .then((res) => {
-        if (!mounted) return;
-        setItems((res && res.data) || []);
-      })
-      .catch(() => {})
-
+      .then((res) => mounted && setItems(res?.data || []))
+      .catch(() => {});
     return () => (mounted = false);
   }, []);
 
-  // 🔍 FILTER PRODUCTS
   const filteredProducts =
     query.length > 0
       ? items
@@ -43,6 +40,7 @@ const Navbar2 = () => {
           }))
           .filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
       : [];
+
   const handleSelect = (id) => {
     setQuery("");
     setMobileSearch(false);
@@ -50,204 +48,111 @@ const Navbar2 = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  // 🔝 scroll helper
-  const scrollTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   return (
     <>
-      {/* ================= NAVBAR ================= */}
-      <nav className="fixed top-0 left-0 w-full z-50 bg-white border-b shadow-sm">
-        <div className="flex items-center justify-between px-4 md:px-16 py-4">
+      <nav className="fixed top-0 left-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-200 shadow-md">
+        <div className="flex items-center justify-between px-4 md:px-14 py-2">
 
           {/* LEFT */}
           <div className="flex items-center gap-4 md:gap-8">
-            {/* Mobile Menu */}
-            <button
-              className="md:hidden"
-              onClick={() => setMobileMenu(true)}
-            >
-              <Menu size={26} />
+            <button className="md:hidden" onClick={() => setMobileMenu(true)}>
+              <Menu size={24} />
             </button>
 
-            {/* LOGO */}
             <Link to="/" onClick={scrollTop}>
-              <img
-                src={Logo}
-                alt="REVE CULT"
-                className="h-12 md:h-16 w-auto object-contain transition hover:scale-105"
-              />
+              <img src={Logo} alt="REVE CULT" className="h-10 md:h-12 hover:scale-105 transition" />
             </Link>
 
-            {/* Desktop Links */}
-            <ul className="hidden md:flex gap-8 text-sm font-medium text-gray-800">
-              <Link to="/" onClick={scrollTop} className="hover:text-pink-600">
-                HOME
-              </Link>
-
-              <Link
-                to="/shop"
-                onClick={scrollTop}
-                className="hover:text-pink-600"
-              >
-                SHOP
-              </Link>
-
-              <Link to="/about" onClick={scrollTop} className="hover:text-pink-600">
-                ABOUT US
-              </Link>
-
-              <Link to="/support" onClick={scrollTop} className="hover:text-pink-600">
-                SUPPORT
-              </Link>
+            <ul className="hidden md:flex gap-10 text-[13px] font-semibold tracking-wide text-gray-700">
+              {[
+                ["/", "HOME"],
+                ["/shop", "SHOP"],
+                ["/about", "ABOUT US"],
+                ["/support", "SUPPORT"],
+              ].map(([path, label]) => (
+                <Link key={path} to={path} onClick={scrollTop} className="hover:text-pink-600 transition">
+                  {label}
+                </Link>
+              ))}
             </ul>
           </div>
 
-          {/* ================= DESKTOP SEARCH ================= */}
-          <div className="relative hidden md:block w-80">
-            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
+          {/* SEARCH DESKTOP */}
+          <div className="hidden md:block w-72">
+            <div className="flex items-center bg-gray-100/80 rounded-full px-4 py-2">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Search products..."
                 className="bg-transparent flex-1 outline-none text-sm"
               />
-              <Search size={18} />
+              <Search size={16} />
             </div>
-
-            {/* SEARCH SUGGESTIONS */}
-            {filteredProducts.length > 0 && (
-              <div className="absolute top-12 left-0 w-full bg-white shadow-lg rounded-xl overflow-hidden z-50">
-                {filteredProducts.slice(0, 5).map((item) => (
-                  <div
-                    key={item.id}
-                    onClick={() => handleSelect(item.id)}
-                    className="flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
-                  >
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className="w-10 h-10 object-contain"
-                    />
-                    <div>
-                      <p className="text-sm font-medium">{item.name}</p>
-                      <p className="text-xs text-gray-500">
-                        Rs. {item.salePrice}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
 
-          {/* RIGHT ICONS */}
-          <div className="flex items-center gap-4">
-            <button
-              className="md:hidden"
-              onClick={() => setMobileSearch(!mobileSearch)}
-            >
-              <Search />
-            </button>
+          {/* RIGHT ICONS + POWERED BY */}
+          <div className="flex flex-col items-end gap-1">
+            <div className="flex items-center gap-3 md:gap-4">
+              <button className="md:hidden" onClick={() => setMobileSearch(!mobileSearch)}>
+                <Search size={20} />
+              </button>
 
-            <Heart
-              onClick={() => {
-                navigate("/wishlist");
-                scrollTop();
-              }}
-              className="cursor-pointer hover:text-pink-600"
-            />
+              <Heart onClick={() => navigate("/wishlist")} className="cursor-pointer hover:text-pink-600 transition" />
+              <User onClick={() => user ? navigate("/profile") : navigate("/login")} className="cursor-pointer hover:text-pink-600 transition" />
+              <ShoppingCart onClick={() => navigate("/cart")} className="cursor-pointer hover:text-pink-600 transition" />
+            </div>
 
-            <User
-              onClick={() => {
-                navigate("/profile");
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
-              className="cursor-pointer hover:text-pink-600"
-            />
-
-            <ShoppingCart
-              onClick={() => {
-                navigate("/cart");
-                scrollTop();
-              }}
-              className="cursor-pointer hover:text-pink-600"
-            />
+            <span className="hidden lg:block text-[10px] text-gray-400 tracking-wider">
+              Powered by Triman Culttech Pvt. Ltd.
+            </span>
           </div>
         </div>
-
-        {/* ================= MOBILE SEARCH ================= */}
-        {mobileSearch && (
-          <div className="md:hidden px-4 pb-4">
-            <div className="relative">
-              <div className="flex items-center bg-gray-100 rounded-full px-4 py-2">
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="bg-transparent flex-1 outline-none text-sm"
-                />
-                <Search size={18} />
-              </div>
-
-              {filteredProducts.length > 0 && (
-                <div className="absolute mt-2 w-full bg-white shadow-lg rounded-xl overflow-hidden z-50">
-                  {filteredProducts.slice(0, 5).map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleSelect(item.id)}
-                      className="flex items-center gap-3 p-3 hover:bg-gray-100 cursor-pointer"
-                    >
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-10 h-10 object-contain"
-                      />
-                      <div>
-                        <p className="text-sm font-medium">{item.name}</p>
-                        <p className="text-xs text-gray-500">
-                          Rs. {item.salePrice}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
       </nav>
 
-      {/* NAVBAR HEIGHT SPACER */}
-      <div className="h-[80px]" />
+      <div className="h-[64px]" />
 
-      {/* ================= MOBILE MENU ================= */}
+      {/* MOBILE MENU */}
       {mobileMenu && (
         <div className="fixed inset-0 bg-black/40 z-50 md:hidden">
           <div className="w-64 bg-white h-full p-6">
             <button onClick={() => setMobileMenu(false)}>
-              <X size={26} />
+              <X size={24} />
             </button>
 
             <ul className="mt-8 flex flex-col gap-6 font-medium">
-              <Link to="/" onClick={() => { scrollTop(); setMobileMenu(false); }}>
-                HOME
-              </Link>
-
-              <Link to="/shop" onClick={() => { scrollTop(); setMobileMenu(false); }}>
-                SHOP
-              </Link>
-
-              <Link to="/about" onClick={() => { scrollTop(); setMobileMenu(false); }}>
-                ABOUT US
-              </Link>
-
-              <Link to="/support" onClick={() => { scrollTop(); setMobileMenu(false); }}>
-                SUPPORT
-              </Link>
+              {[
+                ["/", "HOME"],
+                ["/shop", "SHOP"],
+                ["/about", "ABOUT US"],
+                ["/support", "SUPPORT"],
+              ].map(([path, label]) => (
+                <Link
+                  key={path}
+                  to={path}
+                  onClick={() => {
+                    scrollTop();
+                    setMobileMenu(false);
+                  }}
+                >
+                  {label}
+                </Link>
+              ))}
             </ul>
           </div>
+        </div>
+      )}
+
+      {/* MOBILE SEARCH */}
+      {mobileSearch && (
+        <div className="md:hidden bg-white px-4 py-3 shadow-md">
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search products..."
+            className="w-full bg-gray-100 rounded-full px-4 py-2 outline-none"
+          />
         </div>
       )}
     </>

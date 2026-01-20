@@ -11,7 +11,7 @@ export default function UpiPayment() {
   const [upiId, setUpiId] = useState("");
   const [loading, setLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const { cart, cartSummary, clearCart } = useCart();
+  const { cart, cartSummary, clearCart, referralCode } = useCart();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -57,11 +57,12 @@ export default function UpiPayment() {
       shippingAddress: selectedAddress,
       paymentProvider: 'upi',
       paymentIntentId: fakePaymentIntentId,
+      referralCode: referralCode || undefined,
       totals: {
         subtotal: cartSummary.subtotal,
         tax: cartSummary.gstAmount,
         shipping: cartSummary.shipping,
-        discount: 0,
+        discount: cartSummary.discount,
         grandTotal: cartSummary.grandTotal
       }
     };

@@ -31,7 +31,10 @@ const userSchema = new mongoose.Schema(
     },
     addresses: [addressSchema],
     isBlocked: { type: Boolean, default: false },
-    refreshTokens: [String]
+    refreshTokens: [String],
+    referralCode: { type: String, unique: true },
+    referredBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    referralCount: { type: Number, default: 0 }
   },
   { timestamps: true }
 );
@@ -40,6 +43,18 @@ userSchema.pre('save', async function () {
   if (!this.isModified('password')) return;
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
+});
+
+userSchema.pre('save', async function () {
+  if (!this.isModified('referralCode') && !this.referralCode) {
+    let code;
+    let exists;
+    do {
+      code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      exists = await mongoose.model('User').findOne({ referralCode: code });
+    } while (exists);
+    this.referralCode = code;
+  }
 });
 
 userSchema.methods.comparePassword = function comparePassword(candidate) {

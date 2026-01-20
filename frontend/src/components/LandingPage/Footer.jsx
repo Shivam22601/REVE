@@ -132,9 +132,6 @@ export default function Footer() {
             <ul className="space-y-2">
               {[
                 "Wireless Earbuds",
-                "Power Bank",
-                "Headphones",
-                "Accessories",
               ].map((item) => (
                 <li
                   key={item}

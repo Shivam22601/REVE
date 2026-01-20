@@ -23,7 +23,7 @@ export default function Earbuds() {
         >
           Earbuds by <span className="text-purple-600">REVE CULT</span>
         </Motion.h1>
-
+ 
         <Motion.p
           className="text-gray-600 text-lg mt-4 max-w-2xl mx-auto relative z-10"
           initial={{ opacity: 0 }}

@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 import {
   Search,
   Mail,
@@ -16,6 +18,8 @@ export default function Support() {
   const Motion = motion;
   const [searchQuery, setSearchQuery] = useState("");
   const [showSearchResults, setShowSearchResults] = useState(false);
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -55,7 +59,7 @@ export default function Support() {
       icon: <Mail className="w-6 h-6 text-purple-500" />,
       title: "Email Support",
       description: "Replies within 12–24 hours",
-      action: "support@revecult.com",
+      action: "Send Email",
     },
     {
       icon: <MessageCircle className="w-6 h-6 text-pink-500" />,
@@ -67,15 +71,33 @@ export default function Support() {
       icon: <Phone className="w-6 h-6 text-purple-400" />,
       title: "Call Us",
       description: "For urgent issues",
-      action: "+91 90826 72164",
+      action: "Call Now",
     },
     {
       icon: <Book className="w-6 h-6 text-rose-400" />,
       title: "Guides & Docs",
       description: "Learn everything quickly",
-      action: "View Docs",
+      action: "View About Us",
     },
   ];
+
+  const handleSupportAction = (type) => {
+    if (type === "Email Support") {
+      window.open(
+        "https://mail.google.com/mail/?view=cm&fs=1&to=support@revecult.com",
+        "_blank"
+      );
+    }
+    if (type === "Call Us") {
+      window.location.href = "tel:+919082672164";
+    }
+    if (type === "Guides & Docs") {
+      navigate("/About");
+    }
+    if (type === "Live Chat") {
+      alert("Live chat will be available soon!");
+    }
+  };
 
   const searchResults = faqs.filter(
     (faq) =>
@@ -85,7 +107,6 @@ export default function Support() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900">
-
       {/* HERO SECTION */}
       <section className="py-24 px-6 text-center border-b bg-gradient-to-br from-[#EDE7FF] via-[#FBE8F4] to-white">
         <Motion.h1
@@ -105,7 +126,6 @@ export default function Support() {
           We’re here for you — calm, clear, pastel-soft support for every REVE CULT user.
         </Motion.p>
 
-        {/* Search Bar */}
         <Motion.div
           className="relative max-w-xl mx-auto mt-10"
           initial={{ opacity: 0 }}
@@ -113,7 +133,6 @@ export default function Support() {
           transition={{ delay: 0.3 }}
         >
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-
           <input
             type="text"
             placeholder="Search support articles..."
@@ -124,7 +143,6 @@ export default function Support() {
               setShowSearchResults(e.target.value.trim().length > 0);
             }}
           />
-
           {searchQuery && (
             <button
               onClick={() => {
@@ -137,7 +155,6 @@ export default function Support() {
             </button>
           )}
 
-          {/* Search Results */}
           <AnimatePresence>
             {showSearchResults && (
               <Motion.div
@@ -148,10 +165,7 @@ export default function Support() {
               >
                 {searchResults.length > 0 ? (
                   searchResults.map((faq, i) => (
-                    <div
-                      key={i}
-                      className="p-4 border-b hover:bg-gray-50 cursor-pointer"
-                    >
+                    <div key={i} className="p-4 border-b hover:bg-gray-50 cursor-pointer">
                       <p className="font-medium text-gray-800">{faq.question}</p>
                       <p className="text-gray-500 text-sm mt-1 line-clamp-2">
                         {faq.answer}
@@ -180,7 +194,10 @@ export default function Support() {
             <div className="mb-4">{opt.icon}</div>
             <h3 className="font-semibold text-lg text-gray-900">{opt.title}</h3>
             <p className="text-gray-500 text-sm mt-2">{opt.description}</p>
-            <button className="mt-4 text-purple-600 font-medium">
+            <button
+              onClick={() => handleSupportAction(opt.title)}
+              className="mt-4 text-purple-600 font-medium hover:underline"
+            >
               {opt.action} →
             </button>
           </Motion.div>
@@ -220,7 +237,7 @@ export default function Support() {
               <h3 className="text-xl font-semibold text-gray-900 mb-3">7-Day Return Window</h3>
               <p className="text-gray-700">
                 We offer a 7-day return policy for all REVE CULT products. If you're not completely satisfied with your purchase,
-                you can return it within 30 days of delivery for a full refund or exchange.
+                you can return it within 7 days of delivery for a full refund or exchange.
               </p>
             </div>
 

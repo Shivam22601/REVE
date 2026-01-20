@@ -6,8 +6,10 @@ const {
   addAddress,
   updateAddress,
   deleteAddress,
-  getOrders
+  getOrders,
+  validateReferralCode
 } = require('../controllers/userController');
+const { cancelOrder } = require('../controllers/orderController');
 const { auth } = require('../middlewares/authMiddleware');
 const upload = require('../config/upload');
 const validateRequest = require('../middlewares/validateRequest');
@@ -41,6 +43,10 @@ router.put(
 router.delete('/addresses/:addressId', auth, deleteAddress);
 
 router.get('/orders', auth, getOrders);
+
+router.post('/validate-referral', auth, validateReferralCode);
+
+router.patch('/orders/:id/cancel', auth, cancelOrder);
 
 module.exports = router;
 

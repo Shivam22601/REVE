@@ -6,10 +6,13 @@ const CartContext = createContext(null);
 /* ================= PROVIDER ================= */
 export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
+  const [referralCode, setReferralCode] = useState("");
+  const [referralDiscount, setReferralDiscount] = useState(0);
+  const [referralError, setReferralError] = useState("");
 
   /* ================= CONFIG ================= */
-  const GST_PERCENT = 18;     // 18% GST
-  const SHIPPING_CHARGE = 50; // Flat shipping
+  const GST_PERCENT = 0; // GST percentage
+  const SHIPPING_CHARGE = 0; // Flat shipping charge
 
   /* ================= CART ACTIONS ================= */
 
@@ -68,6 +71,44 @@ export function CartProvider({ children }) {
   // 🧹 Clear cart (after order success)
   const clearCart = () => {
     setCart([]);
+    setReferralCode("");
+    setReferralDiscount(0);
+    setReferralError("");
+  };
+
+  // 🎫 Apply referral code
+  const applyReferralCode = async (code) => {
+    if (!code.trim()) return { success: false, message: "Code is required" };
+
+    try {
+      const response = await fetch("/api/users/validate-referral", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+        body: JSON.stringify({ code: code.trim() }),
+      });
+
+      const data = await response.json();
+
+      if (data.valid) {
+        const discount = Math.round(cartSummary.subtotal * 0.1); // 10% discount
+        setReferralCode(code.toUpperCase());
+        setReferralDiscount(discount);
+        setReferralError("");
+        return { success: true, discount };
+      } else {
+        setReferralError(data.message);
+        setReferralDiscount(0);
+        return { success: false, message: data.message };
+      }
+    } catch (error) {
+      const message = error.response?.data?.message || "Invalid referral code";
+      setReferralError(message);
+      setReferralDiscount(0);
+      return { success: false, message };
+    }
   };
 
   /* ================= CALCULATIONS (AMAZON STYLE) ================= */
@@ -88,7 +129,9 @@ export function CartProvider({ children }) {
 
     const shipping = subtotal > 500 ? 0 : SHIPPING_CHARGE;
 
-    const grandTotal = subtotal + gstAmount + shipping;
+    const discount = referralDiscount;
+
+    const grandTotal = subtotal + gstAmount + shipping - discount;
 
     return {
       totalItems,
@@ -96,14 +139,18 @@ export function CartProvider({ children }) {
       gstPercent: GST_PERCENT,
       gstAmount,
       shipping,
+      discount,
       grandTotal,
     };
-  }, [cart]);
+  }, [cart, referralDiscount]);
 
   /* ================= CONTEXT VALUE ================= */
   const value = {
     // DATA
     cart,
+    referralCode,
+    referralDiscount,
+    referralError,
 
     // ACTIONS
     addToCart,
@@ -111,6 +158,7 @@ export function CartProvider({ children }) {
     increaseQty,
     decreaseQty,
     clearCart,
+    applyReferralCode,
 
     // SUMMARY
     cartSummary,

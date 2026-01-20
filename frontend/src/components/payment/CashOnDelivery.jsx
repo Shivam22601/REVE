@@ -9,7 +9,7 @@ export default function CashOnDelivery() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [selectedAddress, setSelectedAddress] = useState(null);
-  const { cart, cartSummary, clearCart } = useCart();
+  const { cart, cartSummary, clearCart, referralCode } = useCart();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -37,11 +37,12 @@ export default function CashOnDelivery() {
       shippingAddress: selectedAddress,
       paymentProvider: 'cod',
       paymentIntentId: null,
+      referralCode: referralCode || undefined,
       totals: {
         subtotal: cartSummary.subtotal,
         tax: cartSummary.gstAmount,
         shipping: cartSummary.shipping,
-        discount: 0,
+        discount: cartSummary.discount,
         grandTotal: cartSummary.grandTotal
       }
     };

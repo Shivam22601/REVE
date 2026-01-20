@@ -15,7 +15,7 @@ const {
   deleteProduct,
   createCategory
 } = require('../controllers/productController');
-const { updateOrderStatus } = require('../controllers/orderController');
+const { updateOrderStatus, updateOrderDetails, updateOrderAddress } = require('../controllers/orderController');
 const validateRequest = require('../middlewares/validateRequest');
 
 const router = express.Router();
@@ -28,6 +28,8 @@ router.patch('/users/:id/block', [body('block').isBoolean()], validateRequest, s
 
 router.get('/orders', listOrders);
 router.patch('/orders/:id/status', updateOrderStatus);
+router.patch('/orders/:id/details', updateOrderDetails);
+router.patch('/orders/:id/address', updateOrderAddress);
 
 router.get('/products', listProducts);
 router.post(

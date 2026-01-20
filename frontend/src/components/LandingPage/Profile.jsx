@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import AddressForm from "./AddressForm";
 import { userAPI } from "../../config/api";
 import OrderDetailsModal from "../Admin/OrderDetailsModal";
+import UserOrderDetailsModal from "../Admin/UserOrderDetailsModal";
 import aboutBg from "../../assets/logo.jpg";
 
 
@@ -114,6 +115,38 @@ export default function Profile() {
 
         <div className="space-y-3">
           {user.phone && <p><b>Phone:</b> {user.phone}</p>}
+        </div>
+
+        {/* 🎫 Referral Code Section */}
+        <div className="mt-6 p-4 bg-gradient-to-r from-pink-50 to-purple-50 rounded-lg border">
+          <h3 className="text-lg font-semibold mb-2 flex items-center gap-2">
+            <span>🎫</span> Referral Program
+          </h3>
+          <div className="space-y-2">
+            <p className="text-sm text-gray-600">
+              Share your referral code with friends and earn rewards when they make purchases!
+            </p>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">Your Code:</span>
+              <code className="bg-white px-3 py-1 rounded border font-mono text-pink-600">
+                {user.referralCode || 'Loading...'}
+              </code>
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(user.referralCode);
+                  alert('Referral code copied to clipboard!');
+                }}
+                className="text-sm bg-pink-600 text-white px-3 py-1 rounded hover:bg-pink-700"
+              >
+                Copy
+              </button>
+            </div>
+            {user.referralCount > 0 && (
+              <p className="text-sm text-green-600">
+                ✅ {user.referralCount} friend{user.referralCount !== 1 ? 's' : ''} joined using your code!
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="mt-8">
@@ -259,7 +292,11 @@ export default function Profile() {
       )}
 
       {selectedOrder && (
-        <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        isAdmin ? (
+          <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} onUpdate={loadOrders} isAdmin={isAdmin} />
+        ) : (
+          <UserOrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        )
       )}
     </div>
   );

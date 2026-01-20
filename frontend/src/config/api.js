@@ -94,6 +94,7 @@ export const userAPI = {
   deleteAddress: (id) => apiCall(`/users/addresses/${id}`, { method: 'DELETE' }),
   // Orders for current user
   getOrders: () => apiCall('/users/orders'),
+  cancelOrder: (id) => apiCall(`/users/orders/${id}/cancel`, { method: 'PATCH' }),
 };
 
 // Product API
@@ -130,6 +131,8 @@ export const adminAPI = {
   blockUser: (id, block) => apiCall(`/admin/users/${id}/block`, { method: 'PATCH', body: { block } }),
   getOrders: () => apiCall('/admin/orders'),
   updateOrderStatus: (id, status) => apiCall(`/admin/orders/${id}/status`, { method: 'PATCH', body: { status } }),
+  updateOrderDetails: (id, data) => apiCall(`/admin/orders/${id}/details`, { method: 'PATCH', body: data }),
+  updateOrderAddress: (id, data) => apiCall(`/admin/orders/${id}/address`, { method: 'PATCH', body: data }),
   getProducts: () => apiCall('/admin/products'),
   createProduct: (formData) => apiCall('/admin/products', {
     method: 'POST',

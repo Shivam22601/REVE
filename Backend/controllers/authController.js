@@ -19,11 +19,20 @@ const setAuthCookies = (res, accessToken, refreshToken) => {
 };
 
 const register = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, referralCode } = req.body;
 
   const existing = await User.findOne({ email });
   if (existing) {
     return res.status(400).json({ message: 'Email already registered' });
+  }
+
+  let referredBy = null;
+  if (referralCode) {
+    const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+    if (!referrer) {
+      return res.status(400).json({ message: 'Invalid referral code' });
+    }
+    referredBy = referrer._id;
   }
 
   const verificationToken = uuid();
@@ -32,8 +41,14 @@ const register = asyncHandler(async (req, res) => {
     email,
     password,
     verificationToken,
-    verificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000)
+    verificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    referredBy
   });
+
+  // Update referrer's referral count
+  if (referredBy) {
+    await User.findByIdAndUpdate(referredBy, { $inc: { referralCount: 1 } });
+  }
 
   const verifyLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
   await sendVerificationEmail(user, verifyLink);

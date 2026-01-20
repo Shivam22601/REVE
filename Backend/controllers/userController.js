@@ -57,13 +57,47 @@ const getOrders = asyncHandler(async (req, res) => {
   res.json({ orders });
 });
 
+const validateReferralCode = asyncHandler(async (req, res) => {
+  const { code } = req.body;
+
+  if (!code) {
+    return res.status(400).json({ message: 'Referral code is required' });
+  }
+
+  const referrer = await User.findOne({ referralCode: code.toUpperCase() });
+  if (!referrer) {
+    return res.status(400).json({ message: 'Invalid referral code' });
+  }
+
+  if (referrer._id.equals(req.user._id)) {
+    return res.status(400).json({ message: 'Cannot use your own referral code' });
+  }
+
+  // Check if user has already used a referral code
+  const existingOrder = await Order.findOne({
+    user: req.user._id,
+    'totals.discount': { $gt: 0 }
+  });
+
+  if (existingOrder) {
+    return res.status(400).json({ message: 'Referral code already used' });
+  }
+
+  res.json({
+    valid: true,
+    referrer: { name: referrer.name },
+    discount: 10 // 10% discount
+  });
+});
+
 module.exports = {
   getProfile,
   updateProfile,
   addAddress,
   updateAddress,
   deleteAddress,
-  getOrders
+  getOrders,
+  validateReferralCode
 };
 
 

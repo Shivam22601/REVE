@@ -479,7 +479,15 @@ const AdminPanel = () => {
 
       {/* Order Details Modal */}
       {selectedOrder && (
-        <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
+        <OrderDetailsModal 
+          order={selectedOrder} 
+          onClose={() => setSelectedOrder(null)}
+          onUpdate={(updatedOrder) => {
+            setSelectedOrder(updatedOrder);
+            loadOrders(); // Refresh the orders list
+          }}
+          isAdmin={true}
+        />
       )}
     </div>
   );
