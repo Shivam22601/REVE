@@ -129,6 +129,11 @@ export const adminAPI = {
   dashboard: () => apiCall('/admin/dashboard'),
   getUsers: () => apiCall('/admin/users'),
   blockUser: (id, block) => apiCall(`/admin/users/${id}/block`, { method: 'PATCH', body: { block } }),
+  updateUserProfile: (id, formData) => apiCall(`/admin/users/${id}/profile`, {
+    method: 'PUT',
+    body: formData,
+    headers: {},
+  }),
   getOrders: () => apiCall('/admin/orders'),
   updateOrderStatus: (id, status) => apiCall(`/admin/orders/${id}/status`, { method: 'PATCH', body: { status } }),
   updateOrderDetails: (id, data) => apiCall(`/admin/orders/${id}/details`, { method: 'PATCH', body: data }),

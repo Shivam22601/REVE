@@ -96,18 +96,31 @@ const updateProduct = asyncHandler(async (req, res) => {
     updates.features = parseFeatures(req.body.features ?? req.body.description);
   }
 
-  if (req.files?.length) {
-    updates.$push = {
-      images: req.files.map((file) => ({
+  // Handle images update
+  if (req.body.existingImages !== undefined || req.files?.length) {
+    let images = [];
+    
+    // Add existing images if provided
+    if (req.body.existingImages) {
+      try {
+        images = JSON.parse(req.body.existingImages);
+      } catch (err) {
+        return res.status(400).json({ message: 'Invalid existingImages format' });
+      }
+    }
+    
+    // Add new uploaded images
+    if (req.files?.length) {
+      const newImages = req.files.map((file) => ({
         url: file.path || file.secure_url,
         publicId: file.filename || file.public_id
-      }))
-    };
+      }));
+      images = [...images, ...newImages];
+    }
+    
+    updates.images = images;
+    delete updates.$push; // Remove the push operation
   }
-
-
-
-
 
   const product = await Product.findByIdAndUpdate(req.params.id, updates, { new: true });
   if (!product) return res.status(404).json({ message: 'Product not found' });

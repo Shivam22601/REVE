@@ -6,6 +6,7 @@ const {
   dashboard,
   listUsers,
   setUserBlock,
+  updateUserProfile,
   listOrders,
   listProducts
 } = require('../controllers/adminController');
@@ -25,6 +26,7 @@ router.use(auth, adminOnly);
 router.get('/dashboard', dashboard);
 router.get('/users', listUsers);
 router.patch('/users/:id/block', [body('block').isBoolean()], validateRequest, setUserBlock);
+router.put('/users/:id/profile', upload.single('avatar'), validateRequest, updateUserProfile);
 
 router.get('/orders', listOrders);
 router.patch('/orders/:id/status', updateOrderStatus);

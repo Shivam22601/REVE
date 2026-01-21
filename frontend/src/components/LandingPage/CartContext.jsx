@@ -93,7 +93,7 @@ export function CartProvider({ children }) {
       const data = await response.json();
 
       if (data.valid) {
-        const discount = Math.round(cartSummary.subtotal * 0.1); // 10% discount
+        const discount = Math.round(cartSummary.subtotal * 0.05); // 5% discount
         setReferralCode(code.toUpperCase());
         setReferralDiscount(discount);
         setReferralError("");

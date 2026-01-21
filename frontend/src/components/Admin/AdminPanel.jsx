@@ -106,6 +106,19 @@ const AdminPanel = () => {
     }
   };
 
+  const handleUpdateAvatar = async (userId, file) => {
+    if (!file) return;
+    try {
+      const formData = new FormData();
+      formData.append('avatar', file);
+      await adminAPI.updateUserProfile(userId, formData);
+      loadUsers();
+    } catch (error) {
+      console.error('Failed to update avatar:', error);
+      alert('Failed to update avatar');
+    }
+  };
+
   const handleUpdateOrderStatus = async (orderId, status) => {
     try {
       await adminAPI.updateOrderStatus(orderId, status);
@@ -250,6 +263,7 @@ const AdminPanel = () => {
               <table className="w-full text-left">
                 <thead className="bg-gray-50 border-b">
                   <tr>
+                    <th className="px-6 py-4 font-medium text-gray-500">Avatar</th>
                     <th className="px-6 py-4 font-medium text-gray-500">Name</th>
                     <th className="px-6 py-4 font-medium text-gray-500">Email</th>
                     <th className="px-6 py-4 font-medium text-gray-500">Role</th>
@@ -260,6 +274,21 @@ const AdminPanel = () => {
                 <tbody className="divide-y">
                   {users.map((u) => (
                     <tr key={u._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                          <img
+                            src={u.avatar?.url || '/default-avatar.png'}
+                            alt={u.name}
+                            className="w-8 h-8 rounded-full object-cover"
+                          />
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => handleUpdateAvatar(u._id, e.target.files[0])}
+                            className="text-xs"
+                          />
+                        </div>
+                      </td>
                       <td className="px-6 py-4">{u.name}</td>
                       <td className="px-6 py-4">{u.email}</td>
                       <td className="px-6 py-4">

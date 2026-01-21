@@ -39,6 +39,23 @@ const setUserBlock = asyncHandler(async (req, res) => {
   res.json(user);
 });
 
+const updateUserProfile = asyncHandler(async (req, res) => {
+  const fields = ['name', 'email', 'phone'];
+  const updates = {};
+  fields.forEach((field) => {
+    if (req.body[field] !== undefined) updates[field] = req.body[field];
+  });
+  if (req.file) {
+    updates.avatar = {
+      url: req.file.path || req.file.secure_url,
+      publicId: req.file.filename || req.file.public_id 
+    };
+  }
+  const user = await User.findByIdAndUpdate(req.params.id, updates, { new: true }).select('-password');
+  if (!user) return res.status(404).json({ message: 'User not found' });
+  res.json(user);
+});
+
 const listOrders = asyncHandler(async (_req, res) => {
   const orders = await Order.find().populate('user', 'name email').populate('items.product', 'name price images').sort('-createdAt');
   res.json(orders);
@@ -53,6 +70,7 @@ module.exports = {
   dashboard,
   listUsers,
   setUserBlock,
+  updateUserProfile,
   listOrders,
   listProducts
 };

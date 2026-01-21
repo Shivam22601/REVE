@@ -18,6 +18,19 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
   })
 
   useEffect(() => {
+    setEditedOrder({
+      orderNumber: order?.orderNumber || '',
+      totals: {
+        subtotal: order?.totals?.subtotal || 0,
+        tax: order?.totals?.tax || 0,
+        shipping: order?.totals?.shipping || 0,
+        discount: order?.totals?.discount || 0,
+        grandTotal: order?.totals?.grandTotal || 0
+      }
+    })
+  }, [order])
+
+  useEffect(() => {
     if (isAdmin && isEditing) {
       const { subtotal, tax, shipping, discount } = editedOrder.totals
       setEditedOrder(prev => ({

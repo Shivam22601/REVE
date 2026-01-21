@@ -32,12 +32,17 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     setStock(product.stock !== undefined ? Number(product.stock) : 0);
     setCategory(product.category?._id || product.category || '');
     setFeatures(Array.isArray(product.features) ? product.features.join('\n') : (product.features || ''));
-    setImages([]);
+    setImages(product.images || []); // Keep existing images
     setError('');
   }, [product]);
 
   const handleFiles = (e) => {
-    setImages(Array.from(e.target.files));
+    const newFiles = Array.from(e.target.files);
+    setImages([...images.filter(img => !img.url), ...newFiles]); // Keep existing images, add new files
+  };
+
+  const removeImage = (index) => {
+    setImages(images.filter((_, i) => i !== index));
   };
 
   const handleSubmit = async (e) => {
@@ -54,7 +59,14 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     if (features) form.append('features', features);
     form.append('stock', String(stock));
     if (category) form.append('category', category);
-    images.forEach((file) => form.append('images', file));
+    
+    // Send existing images (those with url)
+    const existingImages = images.filter(img => img.url);
+    form.append('existingImages', JSON.stringify(existingImages));
+    
+    // Send new files
+    const newFiles = images.filter(img => !img.url);
+    newFiles.forEach((file) => form.append('images', file));
 
     setLoading(true);
     try {
@@ -128,6 +140,30 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
             onChange={handleFiles}
             className="border p-2 rounded"
           />
+
+          {images.length > 0 && (
+            <div className="border p-2 rounded">
+              <h3 className="font-medium mb-2">Images ({images.length})</h3>
+              <div className="grid grid-cols-3 gap-2">
+                {images.map((img, index) => (
+                  <div key={index} className="relative">
+                    <img
+                      src={img.url || URL.createObjectURL(img)}
+                      alt={`Image ${index + 1}`}
+                      className="w-full h-20 object-cover rounded"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeImage(index)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs hover:bg-red-600"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
             type="submit"

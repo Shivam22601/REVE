@@ -86,7 +86,7 @@ const validateReferralCode = asyncHandler(async (req, res) => {
   res.json({
     valid: true,
     referrer: { name: referrer.name },
-    discount: 10 // 10% discount
+    discount: 5 // 5% discount
   });
 });
 

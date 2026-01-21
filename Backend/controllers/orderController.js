@@ -48,7 +48,7 @@ const createOrder = asyncHandler(async (req, res) => {
       });
 
       if (!existingOrder) {
-        discount = Math.round(subtotal * 0.1); // 10% discount
+        discount = Math.round(subtotal * 0.05); // 5% discount
       }
     }
   }

@@ -99,9 +99,22 @@ const Navbar2 = () => {
                 <Search size={20} />
               </button>
 
-              <Heart onClick={() => navigate("/wishlist")} className="cursor-pointer hover:text-pink-600 transition" />
-              <User onClick={() => user ? navigate("/profile") : navigate("/login")} className="cursor-pointer hover:text-pink-600 transition" />
-              <ShoppingCart onClick={() => navigate("/cart")} className="cursor-pointer hover:text-pink-600 transition" />
+              <Heart onClick={() => {
+                navigate("/wishlist");
+                scrollTop();
+              }} className="cursor-pointer hover:text-pink-600 transition" />
+              <User onClick={() => {
+                if (user) {
+                  navigate("/profile");
+                } else {
+                  navigate("/login");
+                }
+                scrollTop();
+              }} className="cursor-pointer hover:text-pink-600 transition" />
+              <ShoppingCart onClick={() => {
+                navigate("/cart");
+                scrollTop();
+              }} className="cursor-pointer hover:text-pink-600 transition" />
             </div>
 
             <span className="hidden lg:block text-[10px] text-gray-400 tracking-wider">
