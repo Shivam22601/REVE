@@ -104,6 +104,7 @@ export const productAPI = {
     return apiCall(`/products?${query}`);
   },
   getProduct: (id) => apiCall(`/products/${id}`),
+  getProductBasic: (id) => apiCall(`/products/${id}/basic`),
   getCategories: () => apiCall('/products/categories'),
   addReview: (productId, reviewData) => apiCall(`/products/${productId}/reviews`, { method: 'POST', body: reviewData }),
 };
@@ -122,6 +123,8 @@ export const orderAPI = {
   createOrder: (data) => apiCall('/orders', { method: 'POST', body: data }),
   getOrders: () => apiCall('/orders'),
   getOrder: (id) => apiCall(`/orders/${id}`),
+  requestReturn: (orderId, data) => apiCall(`/orders/${orderId}/return`, { method: 'POST', body: data }),
+  getReturnRequests: () => apiCall('/orders/returns'),
 };
 
 // Admin API
@@ -138,6 +141,8 @@ export const adminAPI = {
   updateOrderStatus: (id, status) => apiCall(`/admin/orders/${id}/status`, { method: 'PATCH', body: { status } }),
   updateOrderDetails: (id, data) => apiCall(`/admin/orders/${id}/details`, { method: 'PATCH', body: data }),
   updateOrderAddress: (id, data) => apiCall(`/admin/orders/${id}/address`, { method: 'PATCH', body: data }),
+  getReturnRequests: () => apiCall('/admin/returns'),
+  updateReturnStatus: (id, data) => apiCall(`/orders/returns/${id}/status`, { method: 'PATCH', body: data }),
   getProducts: () => apiCall('/admin/products'),
   createProduct: (formData) => apiCall('/admin/products', {
     method: 'POST',
@@ -153,6 +158,11 @@ export const adminAPI = {
   // Category management
   getCategories: () => apiCall('/products/categories'),
   createCategory: (data) => apiCall('/admin/categories', { method: 'POST', body: data }),
-    updateCategory: (id, data) => apiCall(`/products/categories/${id}`, { method: 'PUT', body: data }),
+  updateCategory: (id, data) => apiCall(`/products/categories/${id}`, { method: 'PUT', body: data }),
   deleteCategory: (id) => apiCall(`/products/categories/${id}`, { method: 'DELETE' }),
-};
+  // Referral code management
+  createReferralCode: (data) => apiCall('/admin/referral-codes', { method: 'POST', body: data }),
+  getReferralCodes: () => apiCall('/admin/referral-codes'),
+  updateReferralCode: (id, data) => apiCall(`/admin/referral-codes/${id}`, { method: 'PATCH', body: data }),
+  deleteReferralCode: (id) => apiCall(`/admin/referral-codes/${id}`, { method: 'DELETE' }),
+}

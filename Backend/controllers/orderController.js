@@ -2,6 +2,9 @@ const { v4: uuid } = require('uuid');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
 const Cart = require('../models/Cart');
+const User = require('../models/User');
+const Return = require('../models/Return');
+const ReferralCode = require('../models/ReferralCode');
 const asyncHandler = require('../utils/asyncHandler');
 const { sendOrderConfirmation } = require('../services/emailService');
 
@@ -39,16 +42,35 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Apply referral code discount
   if (referralCode) {
-    const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
-    if (referrer && !referrer._id.equals(req.user._id)) {
-      // Check if user has already used a referral code
-      const existingOrder = await Order.findOne({
-        user: req.user._id,
-        'totals.discount': { $gt: 0 }
-      });
+    // First check for admin-generated referral codes
+    const adminReferral = await ReferralCode.findOne({
+      code: referralCode.toUpperCase(),
+      isActive: true,
+      $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }]
+    });
 
-      if (!existingOrder) {
-        discount = Math.round(subtotal * 0.05); // 5% discount
+    if (adminReferral && (adminReferral.maxUses === null || adminReferral.usedCount < adminReferral.maxUses)) {
+      if (adminReferral.discountType === 'percentage') {
+        discount = Math.round(subtotal * (adminReferral.discountValue / 100));
+      } else {
+        discount = Math.min(adminReferral.discountValue, subtotal);
+      }
+      // Increment usage count
+      adminReferral.usedCount += 1;
+      await adminReferral.save();
+    } else {
+      // Fallback to user referral codes
+      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
+      if (referrer && !referrer._id.equals(req.user._id)) {
+        // Check if user has already used a referral code
+        const existingOrder = await Order.findOne({
+          user: req.user._id,
+          'totals.discount': { $gt: 0 }
+        });
+
+        if (!existingOrder) {
+          discount = Math.round(subtotal * 0.05); // 5% discount
+        }
       }
     }
   }
@@ -155,6 +177,87 @@ const cancelOrder = asyncHandler(async (req, res) => {
   res.json({ message: 'Order cancelled successfully', order });
 });
 
+const requestReturn = asyncHandler(async (req, res) => {
+  const { items } = req.body; // items: [{ productId, quantity, reason, description }]
+
+  const order = await Order.findOne({ _id: req.params.id, user: req.user._id });
+  if (!order) return res.status(404).json({ message: 'Order not found' });
+
+  if (order.status !== 'delivered') {
+    return res.status(400).json({ message: 'Only delivered orders can be returned' });
+  }
+
+  // Check if return already exists
+  const existingReturn = await Return.findOne({ order: order._id });
+  if (existingReturn) {
+    return res.status(400).json({ message: 'Return request already exists for this order' });
+  }
+
+  // Validate items
+  const returnItems = [];
+  for (const item of items) {
+    const orderItem = order.items.find(i => i.product.toString() === item.productId);
+    if (!orderItem) {
+      return res.status(400).json({ message: `Product ${item.productId} not found in order` });
+    }
+    if (item.quantity > orderItem.quantity) {
+      return res.status(400).json({ message: `Cannot return more than ordered quantity for product ${item.productId}` });
+    }
+    returnItems.push({
+      product: item.productId,
+      quantity: item.quantity,
+      reason: item.reason,
+      description: item.description
+    });
+  }
+
+  const returnRequest = await Return.create({
+    order: order._id,
+    user: req.user._id,
+    items: returnItems
+  });
+
+  res.status(201).json({ message: 'Return request submitted successfully', returnRequest });
+});
+
+const getReturnRequests = asyncHandler(async (req, res) => {
+  const returns = await Return.find({ user: req.user._id })
+    .populate('order', 'orderNumber status totals')
+    .populate('items.product', 'name price images')
+    .sort('-createdAt');
+  res.json(returns);
+});
+
+const getAllReturnRequests = asyncHandler(async (_req, res) => {
+  const returns = await Return.find()
+    .populate('order', 'orderNumber status totals')
+    .populate('user', 'name email')
+    .populate('items.product', 'name price images')
+    .sort('-createdAt');
+  res.json(returns);
+});
+
+const updateReturnStatus = asyncHandler(async (req, res) => {
+  const { status, refundAmount, adminNotes } = req.body;
+
+  const returnRequest = await Return.findById(req.params.id).populate('order');
+  if (!returnRequest) return res.status(404).json({ message: 'Return request not found' });
+
+  returnRequest.status = status;
+  if (refundAmount !== undefined) returnRequest.refundAmount = refundAmount;
+  if (adminNotes) returnRequest.adminNotes = adminNotes;
+
+  // If approved, update order status
+  if (status === 'approved') {
+    returnRequest.order.status = 'returned';
+    await returnRequest.order.save();
+  }
+
+  await returnRequest.save();
+
+  res.json({ message: 'Return status updated successfully', returnRequest });
+});
+
 module.exports = {
   createOrder,
   getOrderHistory,
@@ -162,7 +265,11 @@ module.exports = {
   updateOrderStatus,
   updateOrderDetails,
   updateOrderAddress,
-  cancelOrder
+  cancelOrder,
+  requestReturn,
+  getReturnRequests,
+  getAllReturnRequests,
+  updateReturnStatus
 };
 
 

@@ -10,7 +10,7 @@ export default function Footer() {
     setOpenMenu(openMenu === menu ? null : menu);
   };
 
-  // 🔝 BACK TO TOP (MANUAL)
+  // 🔝 BACK TO TOP
   const handleBackToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -41,7 +41,9 @@ export default function Footer() {
       </button>
 
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-white text-2xl font-semibold mb-4">REVE CULT</h1>
+        <h1 className="text-white text-2xl font-semibold mb-4">
+          REVE CULT
+        </h1>
 
         {/* EMAIL */}
         <div className="flex flex-col md:flex-row md:items-center md:gap-4 mb-12">
@@ -85,22 +87,24 @@ export default function Footer() {
 
           {/* SUPPORT */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Support</h3>
+            <h3 className="text-white font-semibold mb-4">
+              Support
+            </h3>
             <ul className="space-y-2">
               {[
-                "Contact Us",
-                "FAQs",
-                "Shipping Info",
-                "Returns & Exchanges",
-                "Warranty",
-                "Size Guide",
+                { label: "Contact Us", path: "/support" },
+                { label: "FAQs", path: "/support" },
+                { label: "Shipping Info", path: "/support" },
+                { label: "Return Policy", path: "/return-policy" },
+                { label: "Manual", path: "/manual" },
+                { label: "Warranty Claim", path: "/warranty-claim" }, // ✅
               ].map((item) => (
                 <li
-                  key={item}
-                  onClick={() => navigateWithTop("/support")}
+                  key={item.label}
+                  onClick={() => navigateWithTop(item.path)}
                   className="cursor-pointer hover:text-white transition"
                 >
-                  {item}
+                  {item.label}
                 </li>
               ))}
             </ul>
@@ -108,7 +112,9 @@ export default function Footer() {
 
           {/* OFFERS */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Shop by Offers</h3>
+            <h3 className="text-white font-semibold mb-4">
+              Shop by Offers
+            </h3>
             <ul className="space-y-2">
               {[
                 "Reve Exclusive Offers",
@@ -128,11 +134,11 @@ export default function Footer() {
 
           {/* CATEGORY */}
           <div>
-            <h3 className="text-white font-semibold mb-4">Shop by Category</h3>
+            <h3 className="text-white font-semibold mb-4">
+              Shop by Category
+            </h3>
             <ul className="space-y-2">
-              {[
-                "Wireless Earbuds",
-              ].map((item) => (
+              {["Wireless Earbuds"].map((item) => (
                 <li
                   key={item}
                   onClick={() => navigateWithTop("/shop")}
@@ -150,10 +156,12 @@ export default function Footer() {
           {[1, 2, 3].map((menu) => (
             <div
               key={menu}
-              onClick={() => toggleMenu(menu)}
-              className="py-4 border-b border-gray-800 cursor-pointer"
+              className="py-4 border-b border-gray-800"
             >
-              <div className="flex justify-between items-center">
+              <div
+                onClick={() => toggleMenu(menu)}
+                className="flex justify-between items-center cursor-pointer"
+              >
                 <h3 className="text-white text-lg">
                   {menu === 1 && "Our Products"}
                   {menu === 2 && "About Reve Cult"}
@@ -178,13 +186,22 @@ export default function Footer() {
                     )}
 
                   {menu === 3 &&
-                    ["Contact Us", "FAQs", "Warranty"].map((item) => (
+                    [
+                      { label: "Contact Us", path: "/support" },
+                      { label: "FAQs", path: "/support" },
+                      { label: "Return Policy", path: "/return-policy" },
+                      { label: "Manual", path: "/manual" },
+                      { label: "Warranty", path: "/warranty-claim" }, // ✅
+                    ].map((item) => (
                       <li
-                        key={item}
-                        onClick={() => navigateWithTop("/support")}
+                        key={item.label}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateWithTop(item.path);
+                        }}
                         className="hover:text-white transition"
                       >
-                        {item}
+                        {item.label}
                       </li>
                     ))}
                 </ul>

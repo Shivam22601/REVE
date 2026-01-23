@@ -5,6 +5,8 @@ import { useNavigate } from 'react-router-dom';
 import AdminProductForm from './AdminProductForm';
 import AddCategoryForm from './AddCategoryForm';
 import OrderDetailsModal from './OrderDetailsModal';
+import ReturnRequests from './ReturnRequests';
+import ReferralCodes from './ReferralCodes';
 
 
 const AdminPanel = () => {
@@ -219,6 +221,22 @@ const AdminPanel = () => {
             Categories
           </button>
           <button
+            onClick={() => setActiveTab('returns')}
+            className={`w-full text-left px-4 py-2 rounded-lg transition ${
+              activeTab === 'returns' ? 'bg-pink-50 text-pink-600' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Returns
+          </button>
+          <button
+            onClick={() => setActiveTab('referral-codes')}
+            className={`w-full text-left px-4 py-2 rounded-lg transition ${
+              activeTab === 'referral-codes' ? 'bg-pink-50 text-pink-600' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Referral Codes
+          </button>
+          <button
             onClick={() => {
               logout();
               navigate('/');
@@ -350,6 +368,7 @@ const AdminPanel = () => {
                         className={`px-3 py-1 rounded-lg text-sm font-medium border-none outline-none ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-700' :
                           order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                          order.status === 'returned' ? 'bg-blue-100 text-blue-700' :
                           'bg-yellow-100 text-yellow-700'
                         }`}
                       >
@@ -358,6 +377,7 @@ const AdminPanel = () => {
                         <option value="shipped">Shipped</option>
                         <option value="delivered">Delivered</option>
                         <option value="cancelled">Cancelled</option>
+                        <option value="returned">Returned</option>
                       </select>
                       <span className="font-bold text-lg">₹{order.totals?.grandTotal || order.payment?.amount || 0}</span>
                     </div>
@@ -421,6 +441,10 @@ const AdminPanel = () => {
             </div>
           </div>
         )}
+
+        {activeTab === 'returns' && <ReturnRequests />}
+
+        {activeTab === 'referral-codes' && <ReferralCodes />}
 
         {activeTab === 'products' && (
           <div className="space-y-6">

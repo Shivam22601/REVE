@@ -1,13 +1,18 @@
 import React, { useState } from 'react'
-import { userAPI } from '../../config/api' // adjust if needed
+import { userAPI, orderAPI } from '../../config/api' // adjust if needed
 
 const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
   const [cancelling, setCancelling] = useState(false)
+  const [returning, setReturning] = useState(false)
+  const [showReturnForm, setShowReturnForm] = useState(false)
+  const [returnItems, setReturnItems] = useState([])
 
   if (!order) return null
 
   const canCancel =
-    order.status !== 'cancelled' && order.status !== 'delivered'
+    order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'returned'
+
+  const canReturn = order.status === 'delivered'
 
   const handleCancelOrder = async () => {
     const confirmCancel = window.confirm(
@@ -27,11 +32,46 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
     }
   }
 
+  const handleReturnRequest = async () => {
+    if (!returnItems.length) {
+      alert('Please select items to return')
+      return
+    }
+
+    try {
+      setReturning(true)
+      await orderAPI.requestReturn(order._id, { items: returnItems })
+      alert('Return request submitted successfully')
+      onUpdate?.()
+      onClose()
+    } catch (err) {
+      alert('Unable to submit return request. Please try again.')
+    } finally {
+      setReturning(false)
+    }
+  }
+
+  const handleItemReturnChange = (productId, checked, reason = '', description = '') => {
+    if (checked) {
+      const item = order.items.find(i => i.product._id === productId)
+      setReturnItems([...returnItems, {
+        productId,
+        quantity: item.quantity,
+        reason,
+        description
+      }])
+    } else {
+      setReturnItems(returnItems.filter(i => i.productId !== productId))
+    }
+  }
+
   const statusStyle =
     order.status === 'delivered'
       ? 'bg-green-100 text-green-700'
       : order.status === 'cancelled'
       ? 'bg-red-100 text-red-700'
+      : order.status === 'returned'
+      ? 'bg-blue-100 text-blue-700'
       : 'bg-yellow-100 text-yellow-700'
 
   return (
@@ -175,6 +215,15 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
             Close
           </button>
 
+          {canReturn && (
+            <button
+              onClick={() => setShowReturnForm(true)}
+              className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
+            >
+              Request Return
+            </button>
+          )}
+
           {canCancel && (
             <button
               onClick={handleCancelOrder}
@@ -185,6 +234,94 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
             </button>
           )}
         </div>
+
+        {/* Return Form Modal */}
+        {showReturnForm && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg p-6 w-full max-w-2xl">
+              <h2 className="text-xl font-bold mb-4">Request Return</h2>
+              <p className="text-sm text-gray-600 mb-4">
+                Select the items you want to return and provide a reason.
+              </p>
+
+              <div className="space-y-4 mb-6">
+                {order.items.map((item) => (
+                  <div key={item.product._id} className="border p-4 rounded">
+                    <div className="flex items-center gap-3 mb-2">
+                      <input
+                        type="checkbox"
+                        id={`return-${item.product._id}`}
+                        onChange={(e) => handleItemReturnChange(
+                          item.product._id,
+                          e.target.checked,
+                          'defective',
+                          ''
+                        )}
+                        className="w-4 h-4"
+                      />
+                      <label htmlFor={`return-${item.product._id}`} className="font-medium">
+                        {item.product.name} (x{item.quantity})
+                      </label>
+                    </div>
+
+                    {returnItems.find(r => r.productId === item.product._id) && (
+                      <div className="ml-7 space-y-2">
+                        <select
+                          value={returnItems.find(r => r.productId === item.product._id)?.reason || 'defective'}
+                          onChange={(e) => {
+                            const updated = returnItems.map(r =>
+                              r.productId === item.product._id
+                                ? { ...r, reason: e.target.value }
+                                : r
+                            )
+                            setReturnItems(updated)
+                          }}
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="defective">Defective Product</option>
+                          <option value="wrong_item">Wrong Item</option>
+                          <option value="not_as_described">Not as Described</option>
+                          <option value="changed_mind">Changed Mind</option>
+                          <option value="other">Other</option>
+                        </select>
+                        <textarea
+                          placeholder="Additional description (optional)"
+                          value={returnItems.find(r => r.productId === item.product._id)?.description || ''}
+                          onChange={(e) => {
+                            const updated = returnItems.map(r =>
+                              r.productId === item.product._id
+                                ? { ...r, description: e.target.value }
+                                : r
+                            )
+                            setReturnItems(updated)
+                          }}
+                          className="w-full p-2 border rounded"
+                          rows="2"
+                        />
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={() => setShowReturnForm(false)}
+                  className="px-4 py-2 bg-gray-600 text-white rounded"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleReturnRequest}
+                  disabled={returning || !returnItems.length}
+                  className="px-4 py-2 bg-orange-600 text-white rounded disabled:opacity-50"
+                >
+                  {returning ? 'Submitting...' : 'Submit Return Request'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

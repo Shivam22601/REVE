@@ -96,6 +96,8 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
       ? 'bg-green-100 text-green-700'
       : order.status === 'cancelled'
       ? 'bg-red-100 text-red-700'
+      : order.status === 'returned'
+      ? 'bg-blue-100 text-blue-700'
       : 'bg-yellow-100 text-yellow-700'
 
   return (
@@ -238,7 +240,7 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
               <button onClick={() => setIsEditing(true)} className="px-4 py-2 bg-green-600 text-white rounded">
                 Edit
               </button>
-              {order.status !== 'cancelled' && order.status !== 'delivered' && (
+              {order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'returned' && (
                 <button
                   onClick={handleCancelOrder}
                   disabled={cancelling}

@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const {
   listProducts,
   getProduct,
+  getProductBasic,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -21,6 +22,7 @@ const router = express.Router();
 router.get('/', listProducts);
 router.get('/categories', listCategories);
 router.get('/:id', getProduct);
+router.get('/:id/basic', getProductBasic);
 router.post(
   '/:id/reviews',
   auth,

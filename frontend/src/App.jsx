@@ -48,7 +48,9 @@ import ResetPassword from "./components/auth/ResetPassword";
 /* ================= ADMIN ================= */
 import AdminPanel from "./components/Admin/AdminPanel";
 import ErrorBoundary from "./components/ErrorBoundary";
-
+import ReturnPolicy from "./components/Footerlinks/ReturnPolicy";
+import Manual from "./components/Footerlinks/Manual";
+import Warranty from"./components/Footerlinks/Warranty";
 const App = () => {
   return (
     <AuthProvider>
@@ -119,6 +121,12 @@ const App = () => {
                 </div>
               }
             />
+
+            <Route path="/return-policy" element={<ReturnPolicy />} />
+            <Route path="/manual" element={<Manual />} />
+            <Route path="/warranty-claim" element={<Warranty />} />
+
+
 
           </Routes>
 

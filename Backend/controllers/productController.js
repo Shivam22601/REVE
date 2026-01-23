@@ -66,6 +66,13 @@ const getProduct = asyncHandler(async (req, res) => {
   res.json({ product, reviews });
 });
 
+const getProductBasic = asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id)
+    .select('name images');
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+  res.json(product);
+});
+
 const createProduct = asyncHandler(async (req, res) => {
   // Basic validation
   const { name, price } = req.body;
@@ -185,6 +192,7 @@ const addReview = asyncHandler(async (req, res) => {
 module.exports = {
   listProducts,
   getProduct,
+  getProductBasic,
   createProduct,
   updateProduct,
   deleteProduct,

@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Product = require('../models/Product');
+const ReferralCode = require('../models/ReferralCode');
 const asyncHandler = require('../utils/asyncHandler');
 
 const dashboard = asyncHandler(async (_req, res) => {
@@ -66,13 +67,57 @@ const listProducts = asyncHandler(async (_req, res) => {
   res.json(products);
 });
 
+const createReferralCode = asyncHandler(async (req, res) => {
+  const { code, discountType, discountValue, maxUses, expiresAt, description } = req.body;
+
+  const referralCode = await ReferralCode.create({
+    code: code.toUpperCase(),
+    discountType,
+    discountValue,
+    maxUses,
+    expiresAt,
+    description,
+    createdBy: req.user._id
+  });
+
+  res.status(201).json(referralCode);
+});
+
+const getReferralCodes = asyncHandler(async (_req, res) => {
+  const codes = await ReferralCode.find().populate('createdBy', 'name email').sort('-createdAt');
+  res.json(codes);
+});
+
+const updateReferralCode = asyncHandler(async (req, res) => {
+  const { isActive, maxUses, expiresAt, description } = req.body;
+
+  const code = await ReferralCode.findByIdAndUpdate(
+    req.params.id,
+    { isActive, maxUses, expiresAt, description },
+    { new: true }
+  );
+
+  if (!code) return res.status(404).json({ message: 'Referral code not found' });
+  res.json(code);
+});
+
+const deleteReferralCode = asyncHandler(async (req, res) => {
+  const code = await ReferralCode.findByIdAndDelete(req.params.id);
+  if (!code) return res.status(404).json({ message: 'Referral code not found' });
+  res.json({ message: 'Referral code deleted successfully' });
+});
+
 module.exports = {
   dashboard,
   listUsers,
   setUserBlock,
   updateUserProfile,
   listOrders,
-  listProducts
+  listProducts,
+  createReferralCode,
+  getReferralCodes,
+  updateReferralCode,
+  deleteReferralCode
 };
 
 

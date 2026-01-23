@@ -220,7 +220,12 @@ export default function Profile() {
                       <div className="font-semibold">₹{(order.totals?.grandTotal ?? order.payment?.amount ?? 0).toLocaleString()}</div>
                       <div className="text-xs text-gray-500 mt-1">Tax: ₹{(order.totals?.tax ?? 0).toLocaleString()}</div>
                       <div className="text-sm mt-1">
-                        <span className={`px-2 py-1 rounded text-sm ${order.status === 'delivered' ? 'bg-green-100 text-green-700' : order.status === 'cancelled' ? 'bg-red-100 text-red-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                        <span className={`px-2 py-1 rounded text-sm ${
+                          order.status === 'delivered' ? 'bg-green-100 text-green-700' :
+                          order.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                          order.status === 'returned' ? 'bg-blue-100 text-blue-700' :
+                          'bg-yellow-100 text-yellow-700'
+                        }`}>
                           {order.status ? (order.status.charAt(0).toUpperCase() + order.status.slice(1)) : ''}
                         </span>
                       </div>

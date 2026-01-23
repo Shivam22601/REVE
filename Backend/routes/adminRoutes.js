@@ -8,7 +8,11 @@ const {
   setUserBlock,
   updateUserProfile,
   listOrders,
-  listProducts
+  listProducts,
+  createReferralCode,
+  getReferralCodes,
+  updateReferralCode,
+  deleteReferralCode
 } = require('../controllers/adminController');
 const {
   createProduct,
@@ -44,6 +48,12 @@ router.post(
 router.put('/products/:id', upload.array('images', 5), validateRequest, updateProduct);
 router.delete('/products/:id', deleteProduct);
 router.post('/categories', [body('name').notEmpty()], validateRequest, createCategory);
+
+// Referral code routes
+router.post('/referral-codes', [body('code').notEmpty(), body('discountValue').isNumeric()], validateRequest, createReferralCode);
+router.get('/referral-codes', getReferralCodes);
+router.patch('/referral-codes/:id', validateRequest, updateReferralCode);
+router.delete('/referral-codes/:id', deleteReferralCode);
 
 module.exports = router;
 
