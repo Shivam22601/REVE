@@ -2,82 +2,110 @@ import React, { useState, useEffect } from "react";
 import { productAPI } from "../../config/api";
 
 export default function Manual() {
-  const [product, setProduct] = useState(null);
+  const [manualData, setManualData] = useState(null);
+  const [selectedManual, setSelectedManual] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Hardcoded product ID for the manual - in a real app, this could come from props or config
-  const manualProductId = "6792a8b8c8b8b8b8b8b8b8b8"; // Replace with actual product ID
+  // Try multiple product IDs or fetch all manuals
+  const productIds = [
+    "6792a8b8c8b8b8b8b8b8b8b8", // Original hardcoded
+    // Add more product IDs here if needed
+  ];
 
   useEffect(() => {
-    const fetchProduct = async () => {
+    const fetchManuals = async () => {
       try {
         setLoading(true);
-        const data = await productAPI.getProductBasic(manualProductId);
-        setProduct({
-          name: data.name,
-          image: data.images && data.images.length > 0 ? data.images[0].url : "",
-          tagline: "Sound that feels as beautiful as it looks.",
-          intro: "Designed for women who love elegance in every detail, Reve Cult Air Pro blends refined aesthetics with powerful performance — making every moment sound effortlessly beautiful.",
-          features: [
-            "Soft, balanced sound with rich bass that never overwhelms",
-            "Active Noise Cancellation for calm, focused listening",
-            "Up to 40 hours of graceful, uninterrupted playback",
-            "Fast charging — 10 minutes for hours of listening",
-            "Feather-light design for all-day comfort",
-          ],
-          usage: [
-            "Gently charge your earbuds fully before first use.",
-            "Open the case to activate pairing mode automatically.",
-            "Select 'Reve Cult Air Pro' from your Bluetooth settings.",
-            "Use soft touch gestures to control music and calls.",
-            "Place earbuds back in the case after use for care.",
-          ],
-          care: [
-            "Keep away from water, heat, and harsh environments.",
-            "Clean delicately using a soft, dry cloth.",
-            "Avoid prolonged use at high volume levels.",
-            "Store safely in the charging case when not in use.",
-          ],
-        });
+        
+        // Fetch all manuals from public API
+        console.log('Fetching all manuals...');
+        const allManuals = await productAPI.getAllManuals();
+        console.log('All manuals received:', allManuals);
+        
+        if (allManuals && allManuals.length > 0) {
+          console.log('Found manuals:', allManuals.length);
+          // Use the first manual and its product info
+          const firstManual = allManuals[0];
+          setManualData({
+            product: {
+              name: firstManual.product?.name || 'Product',
+              image: firstManual.product?.images?.[0]?.url || null
+            },
+            manuals: allManuals
+          });
+          setSelectedManual(firstManual);
+          return;
+        }
+        
+        // If no manuals found, try specific product IDs as fallback
+        console.log('No manuals found, trying specific product IDs...');
+        for (const productId of productIds) {
+          try {
+            console.log('Trying product ID:', productId);
+            const data = await productAPI.getProductManuals(productId);
+            console.log('Manual data for product', productId, ':', data);
+            
+            if (data.manuals && data.manuals.length > 0) {
+              console.log('Found manuals for product', productId);
+              setManualData(data);
+              setSelectedManual(data.manuals[0]);
+              return;
+            }
+          } catch (err) {
+            console.log('No manuals for product', productId, err.message);
+          }
+        }
+        
+        // If still no manuals, show empty state
+        console.log('No manuals found anywhere');
+        setManualData({ product: { name: 'Product', image: null }, manuals: [] });
+        
       } catch (err) {
-        setError("Failed to load product information");
-        console.error("Error fetching product:", err);
-        // Fallback to hardcoded data if API fails
-        setProduct({
-          name: "Reve Cult Air Pro",
-          tagline: "Sound that feels as beautiful as it looks.",
-          image: "https://cdn.shopify.com/s/files/1/0680/4150/7113/products/airpro-1_800x.png?v=1697054861",
-          intro: "Designed for women who love elegance in every detail, Reve Cult Air Pro blends refined aesthetics with powerful performance — making every moment sound effortlessly beautiful.",
-          features: [
-            "Soft, balanced sound with rich bass that never overwhelms",
-            "Active Noise Cancellation for calm, focused listening",
-            "Up to 40 hours of graceful, uninterrupted playback",
-            "Fast charging — 10 minutes for hours of listening",
-            "Feather-light design for all-day comfort",
-          ],
-          usage: [
-            "Gently charge your earbuds fully before first use.",
-            "Open the case to activate pairing mode automatically.",
-            "Select 'Reve Cult Air Pro' from your Bluetooth settings.",
-            "Use soft touch gestures to control music and calls.",
-            "Place earbuds back in the case after use for care.",
-          ],
-          care: [
-            "Keep away from water, heat, and harsh environments.",
-            "Clean delicately using a soft, dry cloth.",
-            "Avoid prolonged use at high volume levels.",
-            "Store safely in the charging case when not in use.",
-          ],
-        });
+        console.error("Error fetching manuals:", err);
+        setError("Failed to load product manuals: " + (err.message || 'Unknown error'));
       } finally {
         setLoading(false);
       }
     };
 
-    fetchProduct();
+    fetchManuals();
   }, []);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-lavender-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pink-500 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading product manual...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && !manualData) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-lavender-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-600 mb-4">{error}</p>
+          <p className="text-gray-600">Please try again later.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!manualData || !selectedManual) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-lavender-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600 mb-4">No product manuals available at this time.</p>
+          <p className="text-sm text-gray-500">Please check back later or contact support if you believe this is an error.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { product, manuals } = manualData;
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-rose-50 via-white to-lavender-50 flex items-center justify-center">
@@ -118,6 +146,27 @@ export default function Manual() {
         </div>
       </div>
 
+      {/* ================= MANUAL SELECTOR ================= */}
+      {manuals.length > 1 && (
+        <div className="max-w-7xl mx-auto px-6 mb-8">
+          <div className="flex flex-wrap gap-4 justify-center">
+            {manuals.map((manual) => (
+              <button
+                key={manual._id}
+                onClick={() => setSelectedManual(manual)}
+                className={`px-6 py-3 rounded-full font-medium transition-all duration-300 ${
+                  selectedManual._id === manual._id
+                    ? 'bg-pink-500 text-white shadow-lg'
+                    : 'bg-white/80 text-gray-700 hover:bg-pink-50 hover:text-pink-600 shadow-md'
+                }`}
+              >
+                {manual.title}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* ================= CONTENT ================= */}
       <div className="max-w-7xl mx-auto px-6 pb-28 grid md:grid-cols-2 gap-24 items-start">
 
@@ -133,54 +182,60 @@ export default function Manual() {
           </h2>
 
           <p className="text-gray-500 italic mb-6">
-            {product.tagline}
+            {selectedManual.tagline}
           </p>
 
           <p className="text-gray-600 text-lg leading-relaxed mb-10">
-            {product.intro}
+            {selectedManual.intro}
           </p>
 
           {/* FEATURES */}
-          <div className="mb-10">
-            <h3 className="text-xl font-medium text-rose-600 mb-5">
-              ✨ Designed for Everyday Elegance
-            </h3>
-            <ul className="space-y-3 text-gray-600">
-              {product.features.map((item, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="text-pink-400 text-lg">•</span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {selectedManual.features && selectedManual.features.length > 0 && (
+            <div className="mb-10">
+              <h3 className="text-xl font-medium text-rose-600 mb-5">
+                ✨ Designed for Everyday Elegance
+              </h3>
+              <ul className="space-y-3 text-gray-600">
+                {selectedManual.features.map((item, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="text-pink-400 text-lg">•</span>
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           {/* USAGE */}
-          <div className="mb-10">
-            <h3 className="text-xl font-medium text-purple-600 mb-5">
-              🌸 How to Enjoy Your Sound
-            </h3>
-            <ol className="list-decimal pl-5 space-y-3 text-gray-600">
-              {product.usage.map((step, i) => (
-                <li key={i}>{step}</li>
-              ))}
-            </ol>
-          </div>
+          {selectedManual.usage && selectedManual.usage.length > 0 && (
+            <div className="mb-10">
+              <h3 className="text-xl font-medium text-purple-600 mb-5">
+                🌸 How to Enjoy Your Sound
+              </h3>
+              <ol className="list-decimal pl-5 space-y-3 text-gray-600">
+                {selectedManual.usage.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
+              </ol>
+            </div>
+          )}
 
           {/* CARE */}
-          <div>
-            <h3 className="text-xl font-medium text-rose-500 mb-5">
-              💖 Care & Love
-            </h3>
-            <ul className="space-y-3 text-gray-600">
-              {product.care.map((rule, i) => (
-                <li key={i} className="flex gap-3">
-                  <span className="text-rose-400 text-lg">•</span>
-                  {rule}
-                </li>
-              ))}
-            </ul>
-          </div>
+          {selectedManual.care && selectedManual.care.length > 0 && (
+            <div>
+              <h3 className="text-xl font-medium text-rose-500 mb-5">
+                💖 Care & Love
+              </h3>
+              <ul className="space-y-3 text-gray-600">
+                {selectedManual.care.map((rule, i) => (
+                  <li key={i} className="flex gap-3">
+                    <span className="text-rose-400 text-lg">•</span>
+                    {rule}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* ================= RIGHT : IMAGE ================= */}
@@ -192,8 +247,8 @@ export default function Manual() {
             <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-purple-200 rounded-full blur-3xl opacity-60" />
 
             <img
-              src={product.image}
-              alt={product.name}
+              src={selectedManual.images && selectedManual.images.length > 0 ? selectedManual.images[0].url : product.image}
+              alt={selectedManual.title || product.name}
               className="
                 relative z-10
                 h-[480px] md:h-[580px]

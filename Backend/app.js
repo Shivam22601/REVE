@@ -28,10 +28,10 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',') : '*',
+    origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(',').map(url => url.trim()) : ['http://localhost:5173', 'http://localhost:3000'],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
+    allowedHeaders: ['Content-Type', 'Authorization', 'Cookie']
   })
 );
 app.use(helmet());

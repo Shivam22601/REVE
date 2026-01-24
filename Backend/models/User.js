@@ -45,17 +45,7 @@ userSchema.pre('save', async function () {
   this.password = await bcrypt.hash(this.password, salt);
 });
 
-userSchema.pre('save', async function () {
-  if (!this.isModified('referralCode') && !this.referralCode) {
-    let code;
-    let exists;
-    do {
-      code = Math.random().toString(36).substring(2, 8).toUpperCase();
-      exists = await mongoose.model('User').findOne({ referralCode: code });
-    } while (exists);
-    this.referralCode = code;
-  }
-});
+// Removed referral code generation hook - now handled in controller
 
 userSchema.methods.comparePassword = function comparePassword(candidate) {
   return bcrypt.compare(candidate, this.password);

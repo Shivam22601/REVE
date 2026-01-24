@@ -7,6 +7,7 @@ import AddCategoryForm from './AddCategoryForm';
 import OrderDetailsModal from './OrderDetailsModal';
 import ReturnRequests from './ReturnRequests';
 import ReferralCodes from './ReferralCodes';
+import ManualEditor from './ManualEditor';
 
 
 const AdminPanel = () => {
@@ -237,6 +238,14 @@ const AdminPanel = () => {
             Referral Codes
           </button>
           <button
+            onClick={() => setActiveTab('manual')}
+            className={`w-full text-left px-4 py-2 rounded-lg transition ${
+              activeTab === 'manual' ? 'bg-pink-50 text-pink-600' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Manual
+          </button>
+          <button
             onClick={() => {
               logout();
               navigate('/');
@@ -445,6 +454,8 @@ const AdminPanel = () => {
         {activeTab === 'returns' && <ReturnRequests />}
 
         {activeTab === 'referral-codes' && <ReferralCodes />}
+
+        {activeTab === 'manual' && <ManualEditor />}
 
         {activeTab === 'products' && (
           <div className="space-y-6">

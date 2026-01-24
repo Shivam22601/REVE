@@ -35,6 +35,14 @@ const register = asyncHandler(async (req, res) => {
     referredBy = referrer._id;
   }
 
+  // Generate unique referral code
+  let userReferralCode;
+  let exists;
+  do {
+    userReferralCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    exists = await User.findOne({ referralCode: userReferralCode });
+  } while (exists);
+
   const verificationToken = uuid();
   const user = await User.create({
     name,
@@ -42,7 +50,8 @@ const register = asyncHandler(async (req, res) => {
     password,
     verificationToken,
     verificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
-    referredBy
+    referredBy,
+    referralCode: userReferralCode
   });
 
   // Update referrer's referral count
@@ -53,7 +62,7 @@ const register = asyncHandler(async (req, res) => {
   const verifyLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
   await sendVerificationEmail(user, verifyLink);
 
-  res.status(201).json({ message: 'Registered. Please verify your email.' });
+  res.status(201).json({ message: 'Registered. Please verify your email.', referralCode: userReferralCode });
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {

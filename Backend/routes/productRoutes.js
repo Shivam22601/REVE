@@ -11,8 +11,11 @@ const {
   listCategories,
   addReview,
   updateCategory,
-  deleteCategory
+  deleteCategory,
+  getProductManuals,
+  getAllManuals
 } = require('../controllers/productController');
+const { getManual } = require('../controllers/adminController');
 const { auth, adminOnly } = require('../middlewares/authMiddleware');
 const upload = require('../config/upload');
 const validateRequest = require('../middlewares/validateRequest');
@@ -30,6 +33,10 @@ router.post(
   validateRequest,
   addReview
 );
+
+// Public manual access
+router.get('/manuals/all', getAllManuals);
+router.get('/:productId/manual', getProductManuals);
 
 router.post(
   '/',

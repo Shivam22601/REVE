@@ -3,6 +3,17 @@ const Order = require('../models/Order');
 const asyncHandler = require('../utils/asyncHandler');
 
 const getProfile = asyncHandler(async (req, res) => {
+  // Generate referral code if missing
+  if (!req.user.referralCode) {
+    let code;
+    let exists;
+    do {
+      code = Math.random().toString(36).substring(2, 8).toUpperCase();
+      exists = await User.findOne({ referralCode: code });
+    } while (exists);
+    req.user.referralCode = code;
+    await req.user.save();
+  }
   res.json({ user: req.user });
 });
 

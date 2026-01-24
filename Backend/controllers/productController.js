@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
+const Manual = require('../models/Manual');
 const asyncHandler = require('../utils/asyncHandler');
 
 const buildQuery = (query) => {
@@ -189,6 +190,36 @@ const addReview = asyncHandler(async (req, res) => {
   res.status(201).json({ message: 'Review added' });
 });
 
+const getProductManuals = asyncHandler(async (req, res) => {
+  const { productId } = req.params;
+  
+  // Verify product exists
+  const product = await Product.findById(productId).select('name images');
+  if (!product) return res.status(404).json({ message: 'Product not found' });
+
+  // Get all active manuals for this product
+  const manuals = await Manual.find({ 
+    product: productId, 
+    isActive: true 
+  }).sort('-createdAt');
+
+  res.json({
+    product: {
+      name: product.name,
+      image: product.images && product.images.length > 0 ? product.images[0].url : null
+    },
+    manuals
+  });
+});
+
+const getAllManuals = asyncHandler(async (req, res) => {
+  const manuals = await Manual.find({ isActive: true })
+    .populate('product', 'name images')
+    .sort('-createdAt');
+  
+  res.json(manuals);
+});
+
 module.exports = {
   listProducts,
   getProduct,
@@ -200,6 +231,8 @@ module.exports = {
   updateCategory,
   deleteCategory,
   listCategories,
-  addReview
+  addReview,
+  getProductManuals,
+  getAllManuals
 };
 

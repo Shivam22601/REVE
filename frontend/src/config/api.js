@@ -13,7 +13,8 @@ const apiCall = async (endpoint, options = {}) => {
       ...(t && { Authorization: `Bearer ${t}` }),
       ...options.headers,
     },
-    credentials: 'include',
+    // Only include credentials for auth endpoints that need cookies
+    ...(endpoint.startsWith('/auth') ? { credentials: 'include' } : {}),
     ...options,
   });
 
@@ -105,6 +106,8 @@ export const productAPI = {
   },
   getProduct: (id) => apiCall(`/products/${id}`),
   getProductBasic: (id) => apiCall(`/products/${id}/basic`),
+  getProductManuals: (id) => apiCall(`/products/${id}/manual`),
+  getAllManuals: () => apiCall('/products/manuals/all'),
   getCategories: () => apiCall('/products/categories'),
   addReview: (productId, reviewData) => apiCall(`/products/${productId}/reviews`, { method: 'POST', body: reviewData }),
 };
@@ -160,9 +163,10 @@ export const adminAPI = {
   createCategory: (data) => apiCall('/admin/categories', { method: 'POST', body: data }),
   updateCategory: (id, data) => apiCall(`/products/categories/${id}`, { method: 'PUT', body: data }),
   deleteCategory: (id) => apiCall(`/products/categories/${id}`, { method: 'DELETE' }),
-  // Referral code management
-  createReferralCode: (data) => apiCall('/admin/referral-codes', { method: 'POST', body: data }),
-  getReferralCodes: () => apiCall('/admin/referral-codes'),
-  updateReferralCode: (id, data) => apiCall(`/admin/referral-codes/${id}`, { method: 'PATCH', body: data }),
-  deleteReferralCode: (id) => apiCall(`/admin/referral-codes/${id}`, { method: 'DELETE' }),
+  // Manual management
+  createManual: (data) => apiCall('/admin/manuals', { method: 'POST', body: data }),
+  getManuals: () => apiCall('/admin/manuals'),
+  getManual: (id) => apiCall(`/admin/manuals/${id}`),
+  updateManual: (id, data) => apiCall(`/admin/manuals/${id}`, { method: 'PUT', body: data }),
+  deleteManual: (id) => apiCall(`/admin/manuals/${id}`, { method: 'DELETE' }),
 }

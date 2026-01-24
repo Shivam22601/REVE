@@ -48,8 +48,25 @@ const ReferralCodes = () => {
       })
       fetchCodes()
     } catch (error) {
+      console.error('Failed to create referral code:', error)
       alert('Failed to create referral code')
     }
+  }
+
+  const generateCode = () => {
+    return Math.random().toString(36).substring(2, 8).toUpperCase()
+  }
+
+  const openCreateForm = () => {
+    setFormData({
+      code: generateCode(),
+      discountType: 'percentage',
+      discountValue: 5,
+      maxUses: '',
+      expiresAt: '',
+      description: ''
+    })
+    setShowCreateForm(true)
   }
 
   const handleDelete = async (id) => {
@@ -58,6 +75,7 @@ const ReferralCodes = () => {
       await adminAPI.deleteReferralCode(id)
       fetchCodes()
     } catch (error) {
+      console.error('Failed to delete referral code:', error)
       alert('Failed to delete referral code')
     }
   }
@@ -69,7 +87,7 @@ const ReferralCodes = () => {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Referral Codes</h1>
         <button
-          onClick={() => setShowCreateForm(true)}
+          onClick={openCreateForm}
           className="px-4 py-2 bg-blue-600 text-white rounded"
         >
           Create Code
@@ -82,13 +100,23 @@ const ReferralCodes = () => {
           <form onSubmit={handleCreate} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Code</label>
-              <input
-                type="text"
-                value={formData.code}
-                onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
-                className="w-full p-2 border rounded"
-                required
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={formData.code}
+                  onChange={(e) => setFormData({...formData, code: e.target.value.toUpperCase()})}
+                  className="flex-1 p-2 border rounded"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setFormData({...formData, code: generateCode()})}
+                  className="px-3 py-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                  title="Generate new code"
+                >
+                  🔄
+                </button>
+              </div>
             </div>
 
             <div>

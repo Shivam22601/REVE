@@ -88,7 +88,7 @@ export const AuthProvider = ({ children }) => {
   const register = async (name, email, password) => {
     try {
       const response = await authAPI.register({ name, email, password });
-      return { success: true, message: response.message };
+      return { success: true, message: response.message, referralCode: response.referralCode };
     } catch (error) {
       return { success: false, error: error.message };
     }

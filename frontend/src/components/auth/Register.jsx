@@ -34,7 +34,10 @@ const Register = ({ onClose }) => {
     const result = await register(name, email, password);
     
     if (result.success) {
-      setSuccess(result.message || 'Registration successful! Please check your email to verify your account.');
+      const message = result.referralCode 
+        ? `${result.message || 'Registration successful! Please check your email to verify your account.'} Your referral code is: ${result.referralCode}`
+        : result.message || 'Registration successful! Please check your email to verify your account.';
+      setSuccess(message);
       setTimeout(() => {
         onClose?.();
         navigate('/login');

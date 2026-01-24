@@ -12,7 +12,12 @@ const {
   createReferralCode,
   getReferralCodes,
   updateReferralCode,
-  deleteReferralCode
+  deleteReferralCode,
+  getManuals,
+  createManual,
+  updateManual,
+  deleteManual,
+  getManual
 } = require('../controllers/adminController');
 const {
   createProduct,
@@ -54,6 +59,13 @@ router.post('/referral-codes', [body('code').notEmpty(), body('discountValue').i
 router.get('/referral-codes', getReferralCodes);
 router.patch('/referral-codes/:id', validateRequest, updateReferralCode);
 router.delete('/referral-codes/:id', deleteReferralCode);
+
+// Manual routes
+router.get('/manuals', getManuals);
+router.post('/manuals', upload.array('images', 5), [body('productId').notEmpty(), body('title').notEmpty()], validateRequest, createManual);
+router.get('/manuals/:id', getManual);
+router.put('/manuals/:id', upload.array('images', 5), validateRequest, updateManual);
+router.delete('/manuals/:id', deleteManual);
 
 module.exports = router;
 
