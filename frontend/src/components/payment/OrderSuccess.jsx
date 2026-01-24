@@ -1,12 +1,10 @@
-import { useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "../LandingPage/CartContext";
 
 export default function OrderSuccess() {
   const Motion = motion;
-  const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
   const orderNumber = location.state?.orderNumber;
@@ -72,12 +70,12 @@ export default function OrderSuccess() {
             Continue Shopping
           </button>
 
-          <button
-            onClick={() => navigate("/")}
-            className="w-full py-3 border rounded-xl font-semibold hover:bg-gray-100 transition"
+          <Link
+            to="/"
+            className="w-full py-3 border rounded-xl font-semibold hover:bg-gray-100 transition text-center"
           >
             Go to Home
-          </button>
+          </Link>
         </Motion.div>
       </Motion.div>
     </div>

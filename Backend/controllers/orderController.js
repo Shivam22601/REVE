@@ -187,6 +187,15 @@ const requestReturn = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Only delivered orders can be returned' });
   }
 
+  // Check if return is requested within 7 days of delivery
+  const deliveryDate = order.updatedAt; // Assuming updatedAt is set when status changed to delivered
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  
+  if (deliveryDate < sevenDaysAgo) {
+    return res.status(400).json({ message: 'Return requests must be made within 7 days of delivery' });
+  }
+
   // Check if return already exists
   const existingReturn = await Return.findOne({ order: order._id });
   if (existingReturn) {

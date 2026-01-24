@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "../LandingPage/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { orderAPI } from "../../config/api";
+import toast from "react-hot-toast";
 
 export default function UpiPayment() {
   const navigate = useNavigate();
@@ -27,22 +28,22 @@ export default function UpiPayment() {
 
   const handlePayment = async () => {
     if (!upiId) {
-      alert("Please enter your UPI ID");
+      toast.error("Please enter your UPI ID");
       return;
     }
 
     if (!isValidUpi(upiId)) {
-      alert("Please enter a valid UPI ID (example@bank)");
+      toast.error("Please enter a valid UPI ID (example@bank)");
       return;
     }
 
     if (!user) {
-      alert('Please login to place an order');
+      toast.error('Please login to place an order');
       return navigate('/login');
     }
 
     if (!selectedAddress) {
-      alert('Please add or select a shipping address in your profile before placing an order.');
+      toast.error('Please add or select a shipping address in your profile before placing an order.');
       return navigate('/profile');
     }
 
@@ -73,7 +74,7 @@ export default function UpiPayment() {
       navigate('/order-success', { state: { orderId: res._id, orderNumber: res.orderNumber } });
     } catch (err) {
       console.error('Order creation failed:', err);
-      alert(err.message || 'Failed to place order');
+      toast.error(err.message || 'Failed to place order');
     } finally {
       setLoading(false);
     }

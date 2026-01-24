@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Landmark } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function NetBanking() {
   const navigate = useNavigate();
@@ -10,7 +11,7 @@ export default function NetBanking() {
 
   const handlePayment = () => {
     if (!bank) {
-      alert("Please select a bank");
+      toast.error("Please select a bank");
       return;
     }
 

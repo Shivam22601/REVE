@@ -3,6 +3,25 @@ import { Plus, Minus } from "lucide-react";
 
 const policies = [
   {
+    title: "Return Policy",
+    content: `
+You can return products within 7 days of delivery if you are not satisfied with your purchase.
+
+To be eligible for a return:
+- The product must be in its original condition and packaging
+- All accessories, manuals, and documentation must be included
+- The return request must be made within 7 days of receiving the product
+
+Returns are not accepted for:
+- Products that have been used or damaged
+- Personalized or custom-made items
+- Digital products or downloadable content
+- Items from clearance sales
+
+Refunds will be processed within 5-7 business days after approval of your return.
+    `,
+  },
+  {
     title: "Replacement Policy",
     content: `
 We want you to truly love what you receive.

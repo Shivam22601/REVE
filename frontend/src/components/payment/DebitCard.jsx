@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, CreditCard } from "lucide-react";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 export default function DebitCard() {
   const navigate = useNavigate();
@@ -13,12 +14,12 @@ export default function DebitCard() {
   const handlePayment = () => {
     // ✅ Basic validation
     if (!cardNumber || !expiry || !cvv) {
-      alert("Please fill all card details");
+      toast.error("Please fill all card details");
       return;
     }
 
     if (cardNumber.length < 12 || cvv.length < 3) {
-      alert("Invalid card details");
+      toast.error("Invalid card details");
       return;
     }
 

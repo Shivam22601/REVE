@@ -144,7 +144,7 @@ export const adminAPI = {
   updateOrderStatus: (id, status) => apiCall(`/admin/orders/${id}/status`, { method: 'PATCH', body: { status } }),
   updateOrderDetails: (id, data) => apiCall(`/admin/orders/${id}/details`, { method: 'PATCH', body: data }),
   updateOrderAddress: (id, data) => apiCall(`/admin/orders/${id}/address`, { method: 'PATCH', body: data }),
-  getReturnRequests: () => apiCall('/admin/returns'),
+  getReturnRequests: () => apiCall('/orders/admin/returns'),
   updateReturnStatus: (id, data) => apiCall(`/orders/returns/${id}/status`, { method: 'PATCH', body: data }),
   getProducts: () => apiCall('/admin/products'),
   createProduct: (formData) => apiCall('/admin/products', {
@@ -169,4 +169,9 @@ export const adminAPI = {
   getManual: (id) => apiCall(`/admin/manuals/${id}`),
   updateManual: (id, data) => apiCall(`/admin/manuals/${id}`, { method: 'PUT', body: data }),
   deleteManual: (id) => apiCall(`/admin/manuals/${id}`, { method: 'DELETE' }),
+  // Referral code management
+  getReferralCodes: () => apiCall('/admin/referral-codes'),
+  createReferralCode: (data) => apiCall('/admin/referral-codes', { method: 'POST', body: data }),
+  updateReferralCode: (id, data) => apiCall(`/admin/referral-codes/${id}`, { method: 'PATCH', body: data }),
+  deleteReferralCode: (id) => apiCall(`/admin/referral-codes/${id}`, { method: 'DELETE' }),
 }

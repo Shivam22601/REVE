@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 
 const empty = {
   label: '',
@@ -27,7 +28,7 @@ const AddressForm = ({ initial = empty, onCancel, onSave }) => {
     e.preventDefault();
     // basic client-side validation
     if (!form.line1 || !form.city || !form.country) {
-      alert('Please fill required fields: Address, City, Country');
+      toast.error('Please fill required fields: Address, City, Country');
       return;
     }
     onSave(form);

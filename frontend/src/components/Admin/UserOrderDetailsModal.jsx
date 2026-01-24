@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { userAPI, orderAPI } from '../../config/api' // adjust if needed
+import toast from 'react-hot-toast'
 
 const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
   const [cancelling, setCancelling] = useState(false)
@@ -12,7 +13,16 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
   const canCancel =
     order.status !== 'cancelled' && order.status !== 'delivered' && order.status !== 'returned'
 
-  const canReturn = order.status === 'delivered'
+  const canReturn = () => {
+    if (order.status !== 'delivered') return false
+    
+    // Check if within 7 days of delivery
+    const deliveryDate = new Date(order.updatedAt || order.createdAt)
+    const sevenDaysAgo = new Date()
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7)
+    
+    return deliveryDate >= sevenDaysAgo
+  }
 
   const handleCancelOrder = async () => {
     const confirmCancel = window.confirm(
@@ -26,7 +36,7 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
       onUpdate?.()
       onClose()
     } catch (err) {
-      alert('Unable to cancel order. Please try again.')
+      toast.error('Unable to cancel order. Please try again.')
     } finally {
       setCancelling(false)
     }
@@ -34,26 +44,43 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
 
   const handleReturnRequest = async () => {
     if (!returnItems.length) {
-      alert('Please select items to return')
+      toast.error('Please select items to return')
+      return
+    }
+
+    // Filter out items with undefined productId
+    const validReturnItems = returnItems.filter(item => item.productId && item.productId !== 'undefined')
+
+    if (!validReturnItems.length) {
+      toast.error('No valid items selected for return')
       return
     }
 
     try {
       setReturning(true)
-      await orderAPI.requestReturn(order._id, { items: returnItems })
-      alert('Return request submitted successfully')
+      await orderAPI.requestReturn(order._id, { items: validReturnItems })
+      toast.success('Return request submitted successfully')
       onUpdate?.()
       onClose()
     } catch (err) {
-      alert('Unable to submit return request. Please try again.')
+      toast.error('Unable to submit return request. Please try again.')
     } finally {
       setReturning(false)
     }
   }
 
   const handleItemReturnChange = (productId, checked, reason = '', description = '') => {
+    if (!productId || productId === 'undefined') {
+      toast.error('Cannot process return for this item - product information is missing')
+      return
+    }
+
     if (checked) {
-      const item = order.items.find(i => i.product._id === productId)
+      const item = order.items.find(i => (i.product?._id || i.product) === productId)
+      if (!item) {
+        toast.error('Item not found in order')
+        return
+      }
       setReturnItems([...returnItems, {
         productId,
         quantity: item.quantity,
@@ -215,7 +242,7 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
             Close
           </button>
 
-          {canReturn && (
+          {canReturn() && (
             <button
               onClick={() => setShowReturnForm(true)}
               className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-700"
@@ -245,63 +272,68 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
               </p>
 
               <div className="space-y-4 mb-6">
-                {order.items.map((item) => (
-                  <div key={item.product._id} className="border p-4 rounded">
-                    <div className="flex items-center gap-3 mb-2">
-                      <input
-                        type="checkbox"
-                        id={`return-${item.product._id}`}
-                        onChange={(e) => handleItemReturnChange(
-                          item.product._id,
-                          e.target.checked,
-                          'defective',
-                          ''
-                        )}
-                        className="w-4 h-4"
-                      />
-                      <label htmlFor={`return-${item.product._id}`} className="font-medium">
-                        {item.product.name} (x{item.quantity})
-                      </label>
-                    </div>
-
-                    {returnItems.find(r => r.productId === item.product._id) && (
-                      <div className="ml-7 space-y-2">
-                        <select
-                          value={returnItems.find(r => r.productId === item.product._id)?.reason || 'defective'}
-                          onChange={(e) => {
-                            const updated = returnItems.map(r =>
-                              r.productId === item.product._id
-                                ? { ...r, reason: e.target.value }
-                                : r
-                            )
-                            setReturnItems(updated)
-                          }}
-                          className="w-full p-2 border rounded"
-                        >
-                          <option value="defective">Defective Product</option>
-                          <option value="wrong_item">Wrong Item</option>
-                          <option value="not_as_described">Not as Described</option>
-                          <option value="changed_mind">Changed Mind</option>
-                          <option value="other">Other</option>
-                        </select>
-                        <textarea
-                          placeholder="Additional description (optional)"
-                          value={returnItems.find(r => r.productId === item.product._id)?.description || ''}
-                          onChange={(e) => {
-                            const updated = returnItems.map(r =>
-                              r.productId === item.product._id
-                                ? { ...r, description: e.target.value }
-                                : r
-                            )
-                            setReturnItems(updated)
-                          }}
-                          className="w-full p-2 border rounded"
-                          rows="2"
+                {order.items.map((item, idx) => {
+                  const productId = item.product?._id || item.product;
+                  const productName = item.product?.name || 'Unknown Product';
+                  
+                  return (
+                    <div key={productId || idx} className="border p-4 rounded">
+                      <div className="flex items-center gap-3 mb-2">
+                        <input
+                          type="checkbox"
+                          id={`return-${productId || idx}`}
+                          onChange={(e) => handleItemReturnChange(
+                            productId,
+                            e.target.checked,
+                            'defective',
+                            ''
+                          )}
+                          className="w-4 h-4"
                         />
+                        <label htmlFor={`return-${productId || idx}`} className="font-medium">
+                          {productName} (x{item.quantity})
+                        </label>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {returnItems.find(r => r.productId === productId) && (
+                        <div className="ml-7 space-y-2">
+                          <select
+                            value={returnItems.find(r => r.productId === productId)?.reason || 'defective'}
+                            onChange={(e) => {
+                              const updated = returnItems.map(r =>
+                                r.productId === productId
+                                  ? { ...r, reason: e.target.value }
+                                  : r
+                              )
+                              setReturnItems(updated)
+                            }}
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="defective">Defective Product</option>
+                            <option value="wrong_item">Wrong Item</option>
+                            <option value="not_as_described">Not as Described</option>
+                            <option value="changed_mind">Changed Mind</option>
+                            <option value="other">Other</option>
+                          </select>
+                          <textarea
+                            placeholder="Additional description (optional)"
+                            value={returnItems.find(r => r.productId === productId)?.description || ''}
+                            onChange={(e) => {
+                              const updated = returnItems.map(r =>
+                                r.productId === productId
+                                  ? { ...r, description: e.target.value }
+                                  : r
+                              )
+                              setReturnItems(updated)
+                            }}
+                            className="w-full p-2 border rounded"
+                            rows="2"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
 
               <div className="flex justify-end gap-3">

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useCart } from "../LandingPage/CartContext";
 import { useAuth } from "../../context/AuthContext";
 import { orderAPI } from "../../config/api";
+import toast from "react-hot-toast";
 
 export default function CashOnDelivery() {
   const navigate = useNavigate();
@@ -21,12 +22,12 @@ export default function CashOnDelivery() {
 
   const handleConfirm = async () => {
     if (!user) {
-      alert('Please login to place an order');
+      toast.error('Please login to place an order');
       return navigate('/login');
     }
 
     if (!selectedAddress) {
-      alert('Please add or select a shipping address in your profile before placing an order.');
+      toast.error('Please add or select a shipping address in your profile before placing an order.');
       return navigate('/profile');
     }
 
@@ -54,7 +55,7 @@ export default function CashOnDelivery() {
       navigate('/order-success', { state: { orderId: res._id, orderNumber: res.orderNumber } });
     } catch (err) {
       console.error('Order creation failed:', err);
-      alert(err.message || 'Failed to place order');
+      toast.error(err.message || 'Failed to place order');
     } finally {
       setLoading(false);
     }

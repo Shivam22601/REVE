@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { adminAPI } from '../../config/api'
+import toast from 'react-hot-toast'
 
 const ReturnRequests = () => {
   const [returns, setReturns] = useState([])
@@ -29,7 +30,7 @@ const ReturnRequests = () => {
       await fetchReturns()
       setSelectedReturn(null)
     } catch (error) {
-      alert('Failed to update return status')
+      toast.error('Failed to update return status')
     } finally {
       setActionLoading(false)
     }

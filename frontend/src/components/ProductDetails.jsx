@@ -11,6 +11,7 @@ import {
 import { useWishlist } from "./LandingPage/WishlistContext";
 import { useCart } from "./LandingPage/CartContext";
 import { useAuth } from "../context/AuthContext";
+import toast from "react-hot-toast";
 
 export default function ProductDetails() {
   const { id } = useParams();
@@ -141,7 +142,7 @@ export default function ProductDetails() {
       setShowReviewForm(false);
     } catch (error) {
       console.error('Failed to submit review:', error);
-      alert('Failed to submit review. Please try again.');
+      toast.error('Failed to submit review. Please try again.');
     } finally {
       setSubmittingReview(false);
     }

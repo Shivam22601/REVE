@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import {
   Search,
@@ -95,7 +96,7 @@ export default function Support() {
       navigate("/Manual");
     }
     if (type === "Live Chat") {
-      alert("Live chat will be available soon!");
+      toast.info("Live chat will be available soon!");
     }
   };
 

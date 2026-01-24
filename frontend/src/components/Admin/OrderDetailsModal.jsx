@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { adminAPI } from '../../config/api'
+import toast from 'react-hot-toast'
 
 const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
   const [isEditing, setIsEditing] = useState(false)
@@ -71,7 +72,7 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
       onUpdate?.(updated)
       setIsEditing(false)
     } catch {
-      alert('Failed to update order')
+      toast.error('Failed to update order')
     } finally {
       setSaving(false)
     }
@@ -85,7 +86,7 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
       onUpdate()
       onClose()
     } catch {
-      alert('Failed to cancel order')
+      toast.error('Failed to cancel order')
     } finally {
       setCancelling(false)
     }
