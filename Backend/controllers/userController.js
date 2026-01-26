@@ -70,11 +70,33 @@ const getOrders = asyncHandler(async (req, res) => {
 
 const validateReferralCode = asyncHandler(async (req, res) => {
   const { code } = req.body;
+  const ReferralCode = require('../models/ReferralCode');
 
   if (!code) {
     return res.status(400).json({ message: 'Referral code is required' });
   }
 
+  // First check for admin-generated referral codes
+  const adminReferral = await ReferralCode.findOne({
+    code: code.toUpperCase(),
+    isActive: true,
+    $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }]
+  });
+
+  if (adminReferral && (adminReferral.maxUses === null || adminReferral.usedCount < adminReferral.maxUses)) {
+    const discount = adminReferral.discountType === 'percentage' 
+      ? adminReferral.discountValue 
+      : adminReferral.discountValue; // For fixed, show the amount
+    return res.json({
+      valid: true,
+      type: 'admin',
+      discountType: adminReferral.discountType,
+      discountValue: adminReferral.discountValue,
+      discount: discount
+    });
+  }
+
+  // Fallback to user referral codes
   const referrer = await User.findOne({ referralCode: code.toUpperCase() });
   if (!referrer) {
     return res.status(400).json({ message: 'Invalid referral code' });
@@ -96,6 +118,7 @@ const validateReferralCode = asyncHandler(async (req, res) => {
 
   res.json({
     valid: true,
+    type: 'user',
     referrer: { name: referrer.name },
     discount: 5 // 5% discount
   });

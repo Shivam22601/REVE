@@ -93,7 +93,16 @@ export function CartProvider({ children }) {
       const data = await response.json();
 
       if (data.valid) {
-        const discount = Math.round(cartSummary.subtotal * 0.05); // 5% discount
+        let discount = 0;
+        if (data.type === 'admin') {
+          if (data.discountType === 'percentage') {
+            discount = Math.round(cartSummary.subtotal * (data.discountValue / 100));
+          } else {
+            discount = Math.min(data.discountValue, cartSummary.subtotal);
+          }
+        } else {
+          discount = Math.round(cartSummary.subtotal * 0.05); // 5% for user codes
+        }
         setReferralCode(code.toUpperCase());
         setReferralDiscount(discount);
         setReferralError("");
