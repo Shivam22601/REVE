@@ -101,8 +101,8 @@ const login = asyncHandler(async (req, res) => {
 
 const refresh = asyncHandler(async (req, res) => {
   const token =
-    req.cookies?.refreshToken ||
-    (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+    (req.headers.authorization && req.headers.authorization.split(' ')[1]) ||
+    req.cookies?.refreshToken;
   if (!token) return res.status(401).json({ message: 'No refresh token' });
 
   let payload;
@@ -129,8 +129,8 @@ const refresh = asyncHandler(async (req, res) => {
 
 const logout = asyncHandler(async (req, res) => {
   const token =
-    req.cookies?.refreshToken ||
-    (req.headers.authorization && req.headers.authorization.split(' ')[1]);
+    (req.headers.authorization && req.headers.authorization.split(' ')[1]) ||
+    req.cookies?.refreshToken;
   if (token) {
     const payload = require('jsonwebtoken').decode(token);
     if (payload?.id) {

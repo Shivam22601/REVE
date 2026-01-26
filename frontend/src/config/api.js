@@ -13,8 +13,7 @@ const apiCall = async (endpoint, options = {}) => {
       ...(t && { Authorization: `Bearer ${t}` }),
       ...options.headers,
     },
-    // Only include credentials for auth endpoints that need cookies
-    ...(endpoint.startsWith('/auth') ? { credentials: 'include' } : {}),
+    credentials: 'include',
     ...options,
   });
 
