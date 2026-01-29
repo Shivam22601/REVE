@@ -64,7 +64,7 @@ const listOrders = asyncHandler(async (_req, res) => {
 });
 
 const listProducts = asyncHandler(async (_req, res) => {
-  const products = await Product.find();
+  const products = await Product.find().sort({ sortOrder: 1, createdAt: -1, _id: 1 });
   res.json(products);
 });
 

@@ -20,6 +20,16 @@ export default function Profile() {
   const [ordersLoading, setOrdersLoading] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  const openAddAddress = () => {
+    setEditingAddress(null);
+    setShowAddressForm(true);
+  };
+
+  const openEditAddress = (addr) => {
+    setEditingAddress(addr);
+    setShowAddressForm(true);
+  };
+
   const loadOrders = useCallback(async () => {
     if (!user) return;
     setOrdersLoading(true);
@@ -153,7 +163,7 @@ export default function Profile() {
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold">Addresses</h3>
             <div className="flex items-center gap-2">
-              <button onClick={() => setEditingAddress(null) || setShowAddressForm(true)} className="px-4 py-2 bg-pink-600 text-white rounded">Add Address</button>
+              <button onClick={openAddAddress} className="px-4 py-2 bg-pink-600 text-white rounded">Add Address</button>
               <button onClick={() => refreshProfile()} className="px-3 py-2 border rounded">Refresh</button>
             </div>
           </div>
@@ -173,13 +183,13 @@ export default function Profile() {
                       {!addr.isDefault && (
                         <button onClick={async () => {
                           try {
-                            await userAPI.updateAddress(addr._1d, { isDefault: true });
+                            await userAPI.updateAddress(addr._id, { isDefault: true });
                             await refreshProfile();
                           } catch (err) { console.error(err); alert(err.message || 'Failed'); }
                         }} className="text-sm text-pink-600">Set Default</button>
                       )}
                       <div className="flex gap-2">
-                        <button onClick={() => setEditingAddress(addr) || setShowAddressForm(true)} className="text-sm text-gray-600">Edit</button>
+                        <button onClick={() => openEditAddress(addr)} className="text-sm text-gray-600">Edit</button>
                         <button onClick={async () => {
                           if (!window.confirm('Delete address?')) return;
                           try {

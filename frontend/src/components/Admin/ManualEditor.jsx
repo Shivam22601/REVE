@@ -37,7 +37,8 @@ const ManualEditor = () => {
   const fetchProducts = async () => {
     try {
       const data = await productAPI.getProducts()
-      setProducts(data.data || data)
+      const arr = data?.data || data
+      setProducts(Array.isArray(arr) ? arr.filter(Boolean) : [])
     } catch (error) {
       console.error('Failed to fetch products:', error)
     }
@@ -64,7 +65,7 @@ const ManualEditor = () => {
 
   const openEditForm = (manual) => {
     setFormData({
-      productId: manual.product._id,
+      productId: manual.product?._id || manual.productId || '',
       title: manual.title,
       tagline: manual.tagline,
       intro: manual.intro,
@@ -86,8 +87,9 @@ const ManualEditor = () => {
       Object.keys(formData).forEach(key => {
         if (key !== 'images') {
           if (Array.isArray(formData[key])) {
-            formData[key].forEach((item, index) => {
-              submitData.append(`${key}[${index}]`, item)
+            // Append arrays using the same key so backend receives an array
+            formData[key].forEach((item) => {
+              submitData.append(key, item)
             })
           } else {
             submitData.append(key, formData[key])
@@ -96,8 +98,11 @@ const ManualEditor = () => {
       })
 
       // Add image files
-      formData.images.forEach((file, index) => {
-        submitData.append('images', file)
+      // Only append actual File objects; existing image objects (with url) should not be re-sent as files
+      formData.images.forEach((file) => {
+        if (file instanceof File) {
+          submitData.append('images', file)
+        }
       })
 
       if (editingManual) {
@@ -163,6 +168,7 @@ const ManualEditor = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => openEditForm(manual)}
+                  disabled={!manual.product && !manual.productId}
                   className="text-blue-600 hover:text-blue-800 text-sm"
                 >
                   Edit
@@ -175,7 +181,7 @@ const ManualEditor = () => {
                 </button>
               </div>
             </div>
-            <p className="text-sm text-gray-600 mb-2">{manual.product.name}</p>
+            <p className="text-sm text-gray-600 mb-2">{manual.product?.name || 'Unknown / deleted product'}</p>
             <p className="text-sm text-gray-500">{manual.tagline}</p>
             <div className="mt-2 text-xs text-gray-400">
               Features: {manual.features.length} | Usage: {manual.usage.length} | Care: {manual.care.length}

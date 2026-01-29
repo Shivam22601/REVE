@@ -47,7 +47,7 @@ const AdminPanel = () => {
   const loadUsers = useCallback(async () => {
     try {
       const data = await adminAPI.getUsers();
-      setUsers(data);
+      setUsers(Array.isArray(data) ? data.filter(Boolean) : []);
     } catch (error) {
       console.error('Failed to load users:', error);
     }
@@ -56,7 +56,7 @@ const AdminPanel = () => {
   const loadOrders = useCallback(async () => {
     try {
       const data = await adminAPI.getOrders();
-      setOrders(data);
+      setOrders(Array.isArray(data) ? data.filter(Boolean) : []);
     } catch (error) {
       console.error('Failed to load orders:', error);
       // If the error is auth related, log the user out and redirect to login for a fresh session
@@ -70,7 +70,17 @@ const AdminPanel = () => {
   const loadProducts = useCallback(async () => {
     try {
       const data = await adminAPI.getProducts();
-      setProducts(data);
+      const arr = Array.isArray(data) ? data.filter(Boolean) : [];
+      // keep UI stable even if backend doesn't sort
+      arr.sort((a, b) => {
+        const ao = Number(a?.sortOrder ?? 0);
+        const bo = Number(b?.sortOrder ?? 0);
+        if (ao !== bo) return ao - bo;
+        const an = String(a?.name ?? '');
+        const bn = String(b?.name ?? '');
+        return an.localeCompare(bn);
+      });
+      setProducts(arr);
     } catch (error) {
       console.error('Failed to load products:', error);
       if (/(jwt|Authentication|required|Session expired)/i.test(error.message)) {
@@ -83,7 +93,7 @@ const AdminPanel = () => {
   const loadCategories = useCallback(async () => {
     try {
       const data = await adminAPI.getCategories();
-      setCategories(data);
+      setCategories(Array.isArray(data) ? data.filter(Boolean) : []);
     } catch (error) {
       console.error('Failed to load categories:', error);
       if (/(jwt|Authentication|required|Session expired)/i.test(error.message)) {
@@ -299,13 +309,13 @@ const AdminPanel = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {users.map((u) => (
+                  {users.filter(Boolean).map((u) => (
                     <tr key={u._id} className="hover:bg-gray-50">
                       <td className="px-6 py-4">
                         <div className="flex items-center space-x-2">
                           <img
                             src={u.avatar?.url || '/default-avatar.png'}
-                            alt={u.name}
+                            alt={u?.name || 'User'}
                             className="w-8 h-8 rounded-full object-cover"
                           />
                           <input
@@ -316,7 +326,7 @@ const AdminPanel = () => {
                           />
                         </div>
                       </td>
-                      <td className="px-6 py-4">{u.name}</td>
+                      <td className="px-6 py-4">{u?.name || '—'}</td>
                       <td className="px-6 py-4">{u.email}</td>
                       <td className="px-6 py-4">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${

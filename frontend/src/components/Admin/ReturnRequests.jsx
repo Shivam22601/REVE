@@ -15,7 +15,7 @@ const ReturnRequests = () => {
   const fetchReturns = async () => {
     try {
       const data = await adminAPI.getReturnRequests()
-      setReturns(data)
+      setReturns(Array.isArray(data) ? data : (data?.returns || []))
     } catch (error) {
       console.error('Failed to fetch returns:', error)
     } finally {
@@ -66,12 +66,12 @@ const ReturnRequests = () => {
           <tbody>
             {returns.map((returnReq) => (
               <tr key={returnReq._id} className="border-t">
-                <td className="px-4 py-3">{returnReq.order.orderNumber}</td>
-                <td className="px-4 py-3">{returnReq.user.name}</td>
+                <td className="px-4 py-3">{returnReq.order?.orderNumber || returnReq.order?._id?.slice(-8) || '—'}</td>
+                <td className="px-4 py-3">{returnReq.user?.name || returnReq.user?.email || '—'}</td>
                 <td className="px-4 py-3">
-                  {returnReq.items.map((item, idx) => (
+                  {(returnReq.items || []).map((item, idx) => (
                     <div key={idx} className="text-sm">
-                      {item.product.name} (x{item.quantity}) - {item.reason}
+                      {item.product?.name || 'Unknown Product'} (x{item.quantity}) - {item.reason}
                     </div>
                   ))}
                 </td>
@@ -107,15 +107,15 @@ const ReturnRequests = () => {
             <h2 className="text-xl font-bold mb-4">Review Return Request</h2>
 
             <div className="mb-4">
-              <h3 className="font-semibold">Order: {selectedReturn.order.orderNumber}</h3>
-              <p>Customer: {selectedReturn.user.name}</p>
+              <h3 className="font-semibold">Order: {selectedReturn.order?.orderNumber || selectedReturn.order?._id?.slice(-8) || '—'}</h3>
+              <p>Customer: {selectedReturn.user?.name || selectedReturn.user?.email || '—'}</p>
             </div>
 
             <div className="mb-4">
               <h4 className="font-semibold mb-2">Items to Return:</h4>
-              {selectedReturn.items.map((item, idx) => (
+              {(selectedReturn.items || []).map((item, idx) => (
                 <div key={idx} className="border p-3 rounded mb-2">
-                  <p><strong>Product:</strong> {item.product.name}</p>
+                  <p><strong>Product:</strong> {item.product?.name || 'Unknown Product'}</p>
                   <p><strong>Quantity:</strong> {item.quantity}</p>
                   <p><strong>Reason:</strong> {item.reason}</p>
                   {item.description && <p><strong>Description:</strong> {item.description}</p>}

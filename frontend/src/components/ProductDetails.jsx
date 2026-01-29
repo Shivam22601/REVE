@@ -357,7 +357,7 @@ export default function ProductDetails() {
                       />
                     ))}
                   </div>
-                  <span className="font-semibold">{review.user.name}</span>
+                  <span className="font-semibold">{review.user?.name || 'Anonymous'}</span>
                   <span className="text-gray-500 text-sm">
                     {new Date(review.createdAt).toLocaleDateString()}
                   </span>

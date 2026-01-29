@@ -8,6 +8,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
   const [features, setFeatures] = useState('');
   const [stock, setStock] = useState(0);
   const [category, setCategory] = useState('');
+  const [sortOrder, setSortOrder] = useState(0);
   const [images, setImages] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     setPrice(product.price !== undefined ? String(product.price) : '');
     setStock(product.stock !== undefined ? Number(product.stock) : 0);
     setCategory(product.category?._id || product.category || '');
+    setSortOrder(product.sortOrder !== undefined ? Number(product.sortOrder) : 0);
     setFeatures(Array.isArray(product.features) ? product.features.join('\n') : (product.features || ''));
     setImages(product.images || []); // Keep existing images
     setError('');
@@ -59,6 +61,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     if (features) form.append('features', features);
     form.append('stock', String(stock));
     if (category) form.append('category', category);
+    form.append('sortOrder', String(sortOrder));
     
     // Send existing images (those with url)
     const existingImages = images.filter(img => img.url);
@@ -121,6 +124,14 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
             type="number"
             value={stock}
             onChange={(e) => setStock(Number(e.target.value))}
+          />
+
+          <input
+            className="border p-2 rounded"
+            placeholder="Display Order (lower shows first)"
+            type="number"
+            value={sortOrder}
+            onChange={(e) => setSortOrder(Number(e.target.value))}
           />
 
           <select

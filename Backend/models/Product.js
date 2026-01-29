@@ -26,6 +26,8 @@ const productSchema = new mongoose.Schema(
     images: [imageSchema],
     tags: [String],
     isActive: { type: Boolean, default: true },
+    // Controls listing order in admin/UI (lower = earlier)
+    sortOrder: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0 },
     totalReviews: { type: Number, default: 0 }
   },

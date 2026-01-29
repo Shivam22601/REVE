@@ -87,6 +87,7 @@ const createProduct = asyncHandler(async (req, res) => {
   const product = await Product.create({
     ...req.body,
     price: Number(price),
+    sortOrder: req.body.sortOrder !== undefined ? Number(req.body.sortOrder) : 0,
     features,
     images: (req.files || []).map((file) => ({
       url: file.path || file.secure_url,
@@ -98,6 +99,10 @@ const createProduct = asyncHandler(async (req, res) => {
 
 const updateProduct = asyncHandler(async (req, res) => {
   const updates = { ...req.body };
+
+  if (req.body.sortOrder !== undefined) {
+    updates.sortOrder = Number(req.body.sortOrder);
+  }
 
   // Normalize features if provided (or fallback from description)
   if (req.body.features !== undefined || req.body.description !== undefined) {
