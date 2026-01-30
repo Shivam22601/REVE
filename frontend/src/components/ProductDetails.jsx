@@ -280,6 +280,31 @@ export default function ProductDetails() {
                 ? "Remove from Wishlist"
                 : "Add to Wishlist"}
             </button>
+
+            {/* FLIPKART LINK */}
+            {product.flipkartLink && (
+              <a
+                href={product.flipkartLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="
+                  w-full sm:w-auto
+                  flex items-center justify-center gap-2
+                  px-6 sm:px-10 py-4
+                  rounded-xl font-semibold
+                  bg-yellow-400 text-blue-900
+                  hover:bg-yellow-500 hover:shadow-lg transition-all
+                "
+              >
+                <img 
+                  src="https://img1a.flixcart.com/www/linchpin/fk-cp-zion/img/flipkart-plus_8d85f4.png" 
+                  alt="" 
+                  className="h-5 object-contain"
+                  onError={(e) => { e.target.style.display = 'none'; }} 
+                />
+                Shop on Flipkart
+              </a>
+            )}
         </div>
       </div>      </div>
       {/* REVIEWS SECTION */}

@@ -109,7 +109,8 @@ const validateReferralCode = asyncHandler(async (req, res) => {
   // Check if user has already used a referral code
   const existingOrder = await Order.findOne({
     user: req.user._id,
-    'totals.discount': { $gt: 0 }
+    'totals.discount': { $gt: 0 },
+    status: { $ne: 'cancelled' }
   });
 
   if (existingOrder) {

@@ -46,7 +46,7 @@ const createOrder = asyncHandler(async (req, res) => {
     const adminReferral = await ReferralCode.findOne({
       code: referralCode.toUpperCase(),
       isActive: true,
-      $or: [{ expiresAt: { $exists: false } }, { expiresAt: { $gt: new Date() } }]
+      $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }]
     });
 
     if (adminReferral && (adminReferral.maxUses === null || adminReferral.usedCount < adminReferral.maxUses)) {
@@ -62,10 +62,11 @@ const createOrder = asyncHandler(async (req, res) => {
       // Fallback to user referral codes
       const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
       if (referrer && !referrer._id.equals(req.user._id)) {
-        // Check if user has already used a referral code
+        // Check if user has already used a referral code (excluding cancelled orders)
         const existingOrder = await Order.findOne({
           user: req.user._id,
-          'totals.discount': { $gt: 0 }
+          'totals.discount': { $gt: 0 },
+          status: { $ne: 'cancelled' }
         });
 
         if (!existingOrder) {

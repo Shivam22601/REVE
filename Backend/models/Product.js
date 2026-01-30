@@ -23,6 +23,7 @@ const productSchema = new mongoose.Schema(
     category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     subCategory: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
     stock: { type: Number, default: 0 },
+    flipkartLink: { type: String }, // Link to Flipkart product page
     images: [imageSchema],
     tags: [String],
     isActive: { type: Boolean, default: true },

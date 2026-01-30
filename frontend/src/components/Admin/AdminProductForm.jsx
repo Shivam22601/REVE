@@ -7,6 +7,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
   const [price, setPrice] = useState('');
   const [features, setFeatures] = useState('');
   const [stock, setStock] = useState(0);
+  const [flipkartLink, setFlipkartLink] = useState('');
   const [category, setCategory] = useState('');
   const [sortOrder, setSortOrder] = useState(0);
   const [images, setImages] = useState([]);
@@ -61,6 +62,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     if (features) form.append('features', features);
     form.append('stock', String(stock));
     if (category) form.append('category', category);
+    if (flipkartLink) form.append('flipkartLink', flipkartLink);
     form.append('sortOrder', String(sortOrder));
     
     // Send existing images (those with url)
@@ -124,6 +126,14 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
             type="number"
             value={stock}
             onChange={(e) => setStock(Number(e.target.value))}
+          />
+
+          <input
+            className="border p-2 rounded"
+            placeholder="Flipkart Link (Optional)"
+            type="url"
+            value={flipkartLink}
+            onChange={(e) => setFlipkartLink(e.target.value)}
           />
 
           <input
