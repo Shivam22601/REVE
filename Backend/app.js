@@ -23,6 +23,7 @@ try {
   paymentRoutes = express.Router(); // Empty router
 }
 const adminRoutes = require('./routes/adminRoutes');
+const pincodeRoutes = require('./routes/pincodeRoutes');
 
 const app = express();
 
@@ -57,6 +58,7 @@ if (paymentRoutes) {
   app.use('/api/payments', paymentRoutes);
 }
 app.use('/api/admin', adminRoutes);
+app.use('/api/pincodes', pincodeRoutes);
 
 // Serve frontend static files
 const frontendPath = path.join(__dirname, '../frontend/dist');

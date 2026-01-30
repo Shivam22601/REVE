@@ -173,4 +173,13 @@ export const adminAPI = {
   createReferralCode: (data) => apiCall('/admin/referral-codes', { method: 'POST', body: data }),
   updateReferralCode: (id, data) => apiCall(`/admin/referral-codes/${id}`, { method: 'PATCH', body: data }),
   deleteReferralCode: (id) => apiCall(`/admin/referral-codes/${id}`, { method: 'DELETE' }),
-}
+  // Pincode management
+  getPincodes: () => apiCall('/pincodes'),
+  addPincode: (data) => apiCall('/pincodes', { method: 'POST', body: data }),
+  deletePincode: (id) => apiCall(`/pincodes/${id}`, { method: 'DELETE' }),
+};
+
+// Pincode API (Public)
+export const pincodeAPI = {
+  verify: (code) => apiCall('/pincodes/verify', { method: 'POST', body: { code } }),
+};

@@ -7,7 +7,9 @@ import AddCategoryForm from './AddCategoryForm';
 import OrderDetailsModal from './OrderDetailsModal';
 import ReturnRequests from './ReturnRequests';
 import ReferralCodes from './ReferralCodes';
+import PincodeManager from './PincodeManager';
 import ManualEditor from './ManualEditor';
+
 
 
 const AdminPanel = () => {
@@ -248,6 +250,14 @@ const AdminPanel = () => {
             Referral Codes
           </button>
           <button
+            onClick={() => setActiveTab('pincodes')}
+            className={`w-full text-left px-4 py-2 rounded-lg transition ${
+              activeTab === 'pincodes' ? 'bg-pink-50 text-pink-600' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Pincodes
+          </button>
+          <button
             onClick={() => setActiveTab('manual')}
             className={`w-full text-left px-4 py-2 rounded-lg transition ${
               activeTab === 'manual' ? 'bg-pink-50 text-pink-600' : 'text-gray-600 hover:bg-gray-50'
@@ -464,6 +474,8 @@ const AdminPanel = () => {
         {activeTab === 'returns' && <ReturnRequests />}
 
         {activeTab === 'referral-codes' && <ReferralCodes />}
+
+        {activeTab === 'pincodes' && <PincodeManager />}
 
         {activeTab === 'manual' && <ManualEditor />}
 

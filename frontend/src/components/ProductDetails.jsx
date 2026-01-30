@@ -65,6 +65,7 @@ export default function ProductDetails() {
           images: p.images,
           rating: p.averageRating,
           reviews: p.totalReviews,
+          flipkartLink: p.flipkartLink,
           features: Array.isArray(p.features) && p.features.length ? p.features : (p.description ? parseDescToFeatures(p.description) : (p.tags || [])),
           description: p.description,
         });

@@ -1,7 +1,8 @@
 import { useCart } from "../LandingPage/CartContext";
-import { ShoppingCart, Plus, Minus, Trash2, Tag } from "lucide-react";
+import { ShoppingCart, Plus, Minus, Trash2, Tag, MapPin, CheckCircle, XCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { pincodeAPI } from "../../config/api";
 
 export default function Cart() {
   const cartContext = useCart();
@@ -27,6 +28,13 @@ export default function Cart() {
   const [localReferralCode, setLocalReferralCode] = useState(referralCode || "");
   const [isValidating, setIsValidating] = useState(false);
 
+  // Pincode State
+  const [pincode, setPincode] = useState("");
+  const [isPincodeVerified, setIsPincodeVerified] = useState(false);
+  const [pincodeError, setPincodeError] = useState("");
+  const [checkingPincode, setCheckingPincode] = useState(false);
+  const [serviceableLocation, setServiceableLocation] = useState(null);
+
   // 🔝 Scroll to top
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -49,6 +57,31 @@ export default function Cart() {
     if (result?.success) {
       // Update local state to match context
       setLocalReferralCode(localReferralCode.toUpperCase());
+    }
+  };
+
+  const handleCheckPincode = async () => {
+    if (!pincode.trim() || pincode.length < 6) {
+      setPincodeError("Please enter a valid 6-digit pincode");
+      return;
+    }
+    setCheckingPincode(true);
+    setPincodeError("");
+    setServiceableLocation(null);
+    setIsPincodeVerified(false);
+    
+    try {
+      const res = await pincodeAPI.verify(pincode);
+      if (res.serviceable) {
+        setIsPincodeVerified(true);
+        setServiceableLocation(`${res.city}, ${res.state}`);
+      }
+    } catch (err) {
+      setIsPincodeVerified(false);
+      setPincodeError(err.message || "Delivery not available in this area");
+      setServiceableLocation(null);
+    } finally {
+      setCheckingPincode(false);
     }
   };
 
@@ -147,6 +180,65 @@ export default function Cart() {
           </div>
 
           {/* 🎫 REFERRAL CODE SECTION */}
+          {/* Pincode Check */}
+          <div className="mb-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
+            <label className="block text-sm font-medium mb-2 text-gray-700">
+              Check Delivery Availability
+            </label>
+            <div className="flex gap-2">
+              <div className="relative flex-1">
+                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={pincode}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                    setPincode(val);
+                    if (val.length < 6) {
+                      setIsPincodeVerified(false);
+                      setServiceableLocation(null);
+                      setPincodeError("");
+                    }
+                  }}
+                  placeholder="Enter Pincode"
+                  className={`w-full pl-9 pr-3 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
+                    isPincodeVerified ? 'border-green-500 focus:ring-green-500' : 
+                    pincodeError ? 'border-red-500 focus:ring-red-500' : 
+                    'focus:ring-pink-500'
+                  }`}
+                  maxLength={6}
+                />
+              </div>
+              <button
+                onClick={handleCheckPincode}
+                disabled={checkingPincode || pincode.length !== 6}
+                className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+              >
+                {checkingPincode ? "Checking..." : "Check"}
+              </button>
+            </div>
+            
+            {pincodeError && (
+              <div className="flex items-center gap-2 text-red-500 text-sm mt-2">
+                <XCircle className="w-4 h-4" />
+                <span>{pincodeError}</span>
+              </div>
+            )}
+            
+            {isPincodeVerified && serviceableLocation && (
+              <div className="flex items-center gap-2 text-green-600 text-sm mt-2 bg-green-50 p-2 rounded">
+                <CheckCircle className="w-4 h-4" />
+                <span>Delivery available to <b>{serviceableLocation}</b></span>
+              </div>
+            )}
+            
+            {!isPincodeVerified && !pincodeError && (
+              <p className="text-xs text-gray-500 mt-2">
+                * Please verify your pincode to proceed
+              </p>
+            )}
+          </div>
+
           <div className="mb-4">
             <label className="block text-sm font-medium mb-2">
               Referral Code (Optional)
@@ -209,14 +301,19 @@ export default function Cart() {
           {/* ✅ PAYMENT NAVIGATION */}
           <button
             onClick={() => navigate("/payment")}
-            className="
+            disabled={!isPincodeVerified}
+            title={!isPincodeVerified ? "Please verify delivery pincode first" : ""}
+            className={`
               w-full py-3
-              bg-gradient-to-r from-pink-500 to-purple-600
               text-white rounded-xl font-bold
-              hover:scale-[1.02] transition
-            "
+              transition
+              ${!isPincodeVerified 
+                ? "bg-gray-400 cursor-not-allowed" 
+                : "bg-gradient-to-r from-pink-500 to-purple-600 hover:scale-[1.02] shadow-lg hover:shadow-xl"
+              }
+            `}
           >
-            Proceed to Checkout
+            {isPincodeVerified ? "Proceed to Checkout" : "Verify Pincode to Proceed"}
           </button>
         </div>
       </div>

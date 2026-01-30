@@ -32,6 +32,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     setName(product.name || '');
     setPrice(product.price !== undefined ? String(product.price) : '');
     setStock(product.stock !== undefined ? Number(product.stock) : 0);
+    setFlipkartLink(product.flipkartLink || '');
     setCategory(product.category?._id || product.category || '');
     setSortOrder(product.sortOrder !== undefined ? Number(product.sortOrder) : 0);
     setFeatures(Array.isArray(product.features) ? product.features.join('\n') : (product.features || ''));

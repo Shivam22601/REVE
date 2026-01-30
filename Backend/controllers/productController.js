@@ -43,7 +43,7 @@ const listProducts = asyncHandler(async (req, res) => {
 
   const [items, count] = await Promise.all([
     Product.find(filter)
-      .select('name price salePrice images averageRating totalReviews slug category') // Select only needed fields
+      .select('name price salePrice images averageRating totalReviews slug category flipkartLink') // Select only needed fields
       .populate('category', 'name') // Populate only name
       .populate('subCategory', 'name')
       .sort(sort)
