@@ -74,7 +74,11 @@ export default function Cart() {
       const res = await pincodeAPI.verify(pincode);
       if (res.serviceable) {
         setIsPincodeVerified(true);
-        setServiceableLocation(`${res.city}, ${res.state}`);
+        if (res.city && res.state) {
+          setServiceableLocation(`${res.city}, ${res.state}`);
+        } else {
+          setServiceableLocation('your location');
+        }
       }
     } catch (err) {
       setIsPincodeVerified(false);

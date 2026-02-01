@@ -176,6 +176,7 @@ export const adminAPI = {
   // Pincode management
   getPincodes: () => apiCall('/pincodes'),
   addPincode: (data) => apiCall('/pincodes', { method: 'POST', body: data }),
+  bulkAddPincodes: (data) => apiCall('/pincodes/bulk', { method: 'POST', body: data }),
   deletePincode: (id) => apiCall(`/pincodes/${id}`, { method: 'DELETE' }),
 };
 

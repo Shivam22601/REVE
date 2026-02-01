@@ -8,7 +8,7 @@ const AddCategoryForm = ({ categories = [], onCreated }) => {
   const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); 
     setError('');
     if (!name) {
       setError('Name is required');

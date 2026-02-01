@@ -34,6 +34,42 @@ const addPincode = asyncHandler(async (req, res) => {
   res.status(201).json(pincode);
 });
 
+// @desc    Bulk add pincodes
+// @route   POST /api/pincodes/bulk
+// @access  Admin
+const bulkAddPincodes = asyncHandler(async (req, res) => {
+  const { pincodes } = req.body; // Array of { code, city, state }
+
+  if (!pincodes || !Array.isArray(pincodes) || pincodes.length === 0) {
+    return res.status(400).json({ message: 'No pincodes provided' });
+  }
+
+  // Filter out duplicates within the input array
+  const uniqueInput = Array.from(new Set(pincodes.map(p => p.code)))
+    .map(code => pincodes.find(p => p.code === code));
+
+  // Find existing pincodes to avoid duplicate key errors
+  const existingCodes = await Pincode.find({ 
+    code: { $in: uniqueInput.map(p => p.code) } 
+  }).select('code');
+  
+  const existingCodeSet = new Set(existingCodes.map(p => p.code));
+  
+  // Filter only new pincodes
+  const newPincodes = uniqueInput.filter(p => !existingCodeSet.has(p.code));
+
+  if (newPincodes.length === 0) {
+    return res.json({ message: 'All provided pincodes already exist', count: 0 });
+  }
+
+  const result = await Pincode.insertMany(newPincodes);
+  res.status(201).json({ 
+    message: `Successfully added ${result.length} pincodes`, 
+    count: result.length,
+    skipped: uniqueInput.length - result.length 
+  });
+});
+
 // @desc    Get all pincodes
 // @route   GET /api/pincodes
 // @access  Admin
@@ -53,6 +89,7 @@ const deletePincode = asyncHandler(async (req, res) => {
 module.exports = {
   verifyPincode,
   addPincode,
+  bulkAddPincodes,
   getPincodes,
   deletePincode
 };
