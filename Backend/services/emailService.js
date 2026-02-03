@@ -17,8 +17,8 @@ const getFromEmail = () => {
   return rawFrom && rawFrom.includes('<') ? rawFrom : `"Revecult" <${rawFrom}>`;
 };
 
-const sendVerificationEmail = async (user, link) => {
-  const mail = verificationEmail(user.name, link);
+const sendVerificationEmail = async (user, otp) => {
+  const mail = verificationEmail(user.name, otp);
 
   try {
     const transporter = getTransporter();

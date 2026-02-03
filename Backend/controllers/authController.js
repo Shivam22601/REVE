@@ -35,6 +35,11 @@ const register = asyncHandler(async (req, res) => {
     referredBy = referrer._id;
   }
 
+  // Generate 6-digit OTP
+  let otp;
+  // Ensure uniqueness if needed, but for OTPs simple random is usually enough per user
+  otp = Math.floor(100000 + Math.random() * 900000).toString();
+
   // Generate unique referral code
   let userReferralCode;
   let exists;
@@ -43,13 +48,12 @@ const register = asyncHandler(async (req, res) => {
     exists = await User.findOne({ referralCode: userReferralCode });
   } while (exists);
 
-  const verificationToken = uuid();
   const user = await User.create({
     name,
     email,
     password,
-    verificationToken,
-    verificationExpires: new Date(Date.now() + 24 * 60 * 60 * 1000),
+    verificationToken: otp,
+    verificationExpires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
     referredBy,
     referralCode: userReferralCode
   });
@@ -59,26 +63,58 @@ const register = asyncHandler(async (req, res) => {
     await User.findByIdAndUpdate(referredBy, { $inc: { referralCount: 1 } });
   }
 
-  const verifyLink = `${process.env.CLIENT_URL}/verify-email?token=${verificationToken}`;
-  await sendVerificationEmail(user, verifyLink);
+  await sendVerificationEmail(user, otp);
 
-  res.status(201).json({ message: 'Registered. Please verify your email.', referralCode: userReferralCode });
+  res.status(201).json({ message: 'Registered. Please check your email for OTP.', referralCode: userReferralCode });
 });
 
 const verifyEmail = asyncHandler(async (req, res) => {
-  const { token } = req.query;
-  const user = await User.findOne({
-    verificationToken: token,
-    verificationExpires: { $gt: new Date() }
-  });
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid or expired token' });
+  const { email, otp } = req.body;
+  
+  if (!email || !otp) {
+    return res.status(400).json({ message: 'Email and OTP are required' });
   }
+
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  if (user.isVerified) {
+    return res.status(400).json({ message: 'Email already verified' });
+  }
+
+  if (user.verificationToken !== otp || user.verificationExpires < new Date()) {
+    return res.status(400).json({ message: 'Invalid or expired OTP' });
+  }
+
   user.isVerified = true;
   user.verificationToken = undefined;
   user.verificationExpires = undefined;
   await user.save();
   res.json({ message: 'Email verified successfully' });
+});
+
+const resendOTP = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  if (user.isVerified) {
+    return res.status(400).json({ message: 'Email already verified' });
+  }
+
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  user.verificationToken = otp;
+  user.verificationExpires = new Date(Date.now() + 10 * 60 * 1000);
+  await user.save();
+
+  await sendVerificationEmail(user, otp);
+  res.json({ message: 'OTP resent successfully' });
 });
 
 const login = asyncHandler(async (req, res) => {
@@ -210,6 +246,7 @@ const googleLogin = asyncHandler(async (req, res) => {
 module.exports = {
   register,
   verifyEmail,
+  resendOTP,
   login,
   googleLogin,
   refresh,

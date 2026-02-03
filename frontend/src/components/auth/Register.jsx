@@ -35,18 +35,16 @@ const Register = ({ onClose }) => {
     
     if (result.success) {
       const message = result.referralCode 
-        ? `${result.message || 'Registration successful! Please check your email to verify your account.'} Your referral code is: ${result.referralCode}`
-        : result.message || 'Registration successful! Please check your email to verify your account.';
-      setSuccess(message);
-      setTimeout(() => {
-        onClose?.();
-        navigate('/login');
-      }, 2000);
+        ? `Registration successful! Your referral code is: ${result.referralCode}`
+        : 'Registration successful!';
+      
+      // Store email for verification page
+      navigate(`/verify-email?email=${encodeURIComponent(email)}`, { state: { message } });
+      onClose?.();
     } else {
       setError(result.error || 'Registration failed');
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   return (

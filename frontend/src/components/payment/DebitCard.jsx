@@ -28,7 +28,7 @@ export default function DebitCard() {
 
     setTimeout(() => {
       setLoading(false);
-      navigate("/order-success"); // 🎉 redirect to success page
+      navigate("/order-success", { state: { orderNumber: `ORD-${Date.now().toString().slice(-6)}` } });
     }, 1500);
   };
 

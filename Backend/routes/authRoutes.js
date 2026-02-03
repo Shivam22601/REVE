@@ -3,6 +3,7 @@ const { body } = require('express-validator');
 const {
   register,
   verifyEmail,
+  resendOTP,
   login,
   googleLogin,
   refresh,
@@ -25,7 +26,8 @@ router.post(
   register
 );
 
-router.get('/verify-email', verifyEmail);
+router.post('/verify-email', verifyEmail);
+router.post('/resend-otp', resendOTP);
 
 router.post(
   '/login',

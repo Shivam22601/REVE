@@ -1,10 +1,10 @@
-const verificationEmail = (name, link) => ({
-  subject: 'Please verify your email',
+const verificationEmail = (name, otp) => ({
+  subject: 'Verify your email - OTP',
   text: `Hi ${name || 'there'},
 
-Please verify your email to activate your account:
+Your verification code is: ${otp}
 
-${link}
+Please enter this code to verify your account. This code will expire in 10 minutes.
 
 If you did not create this account, you can ignore this email.`,
   html: `
@@ -22,58 +22,42 @@ If you did not create this account, you can ignore this email.`,
         align-items: center;
         justify-content: center;
       ">
-        <span style="color: #ffffff; font-size: 26px;">🙂</span>
+        <span style="color: #ffffff; font-size: 26px;">🔐</span>
       </div>
 
       <!-- Title -->
       <h2 style="font-size: 22px; margin-bottom: 12px;">
-        Please verify your email 😄
+        Verify your email
       </h2>
 
       <!-- Subtitle -->
       <p style="font-size: 15px; color: #374151; margin-bottom: 28px;">
-        To use <strong>X</strong>, click the verification button.  
-        This helps keep your account secure.
+        Use the following OTP to complete your registration procedures.
       </p>
 
-      <!-- Button -->
-      <a
-        href="${link}"
-        style="
-          display: inline-block;
-          padding: 14px 28px;
-          background-color: #2563eb;
-          color: #ffffff;
-          text-decoration: none;
-          border-radius: 8px;
-          font-size: 15px;
-          font-weight: 600;
-          margin-bottom: 32px;
-        "
-      >
-        Verify my account
-      </a>
+      <!-- OTP -->
+      <div style="
+        background-color: #f3f4f6;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 32px;
+      ">
+        <span style="
+          font-size: 32px;
+          font-weight: 700;
+          letter-spacing: 4px;
+          color: #111827;
+        ">${otp}</span>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280; margin-bottom: 32px;">
+        This code is valid for 10 minutes.
+      </p>
 
       <!-- Footer text -->
       <p style="font-size: 13px; color: #6b7280; line-height: 1.6; margin-top: 24px;">
-        You're receiving this email because you have an account in X.
-        If you are not sure why you're receiving this, please contact us by replying to this email.
+        If you didn't request this, you can safely ignore this email.
       </p>
-
-      <!-- Info box -->
-      <div style="
-        margin-top: 28px;
-        padding: 16px;
-        background-color: #f3f4f6;
-        border-radius: 10px;
-        font-size: 12px;
-        color: #6b7280;
-        line-height: 1.5;
-      ">
-        Email specialists use X’s intuitive tool to design emails for desktop and mobile,
-        and let our smart algorithm generate HTML for use in their ESPs.
-      </div>
-
     </div>
   </div>
   `

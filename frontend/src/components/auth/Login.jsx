@@ -25,6 +25,14 @@ const Login = ({ onClose }) => {
       if (!onClose) window.location.reload(); // Reload to update state if full page
     } else {
       setError(result.error || 'Login failed');
+      // If error indicates unverified email, offer redirection
+      if (result.error === 'Please verify your email') {
+        // Optional: you could auto-redirect or show a button
+        setTimeout(() => {
+            navigate(`/verify-email?email=${encodeURIComponent(email)}`);
+            onClose?.();
+        }, 1500);
+      }
     }
     
     setLoading(false);

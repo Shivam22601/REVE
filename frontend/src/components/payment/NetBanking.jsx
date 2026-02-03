@@ -20,7 +20,7 @@ export default function NetBanking() {
 
     setTimeout(() => {
       setLoading(false);
-      navigate("/order-success"); // 🎉 success page
+      navigate("/order-success", { state: { orderNumber: `ORD-${Date.now().toString().slice(-6)}` } });
     }, 1500);
   };
 
