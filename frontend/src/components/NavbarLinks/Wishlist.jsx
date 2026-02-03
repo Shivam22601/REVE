@@ -23,10 +23,10 @@ export default function Wishlist() {
           Save products you love to buy later ❤️
         </p>
         <button
-          onClick={() => navigate("/shop")}
+          onClick={() => navigate("/cart")}
           className="px-8 py-3 bg-black text-white rounded-lg font-semibold"
         >
-          Go to Shop
+          Buy Now
         </button>
       </div>
     );
