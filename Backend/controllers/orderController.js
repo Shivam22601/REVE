@@ -7,6 +7,7 @@ const Return = require('../models/Return');
 const ReferralCode = require('../models/ReferralCode');
 const asyncHandler = require('../utils/asyncHandler');
 const { sendOrderConfirmation } = require('../services/emailService');
+const { validateReferral } = require('../utils/referralUtils');
 
 const createOrder = asyncHandler(async (req, res) => {
   const { items, shippingAddress, billingAddress, paymentIntentId, paymentProvider, totals, referralCode } = req.body;
@@ -42,36 +43,22 @@ const createOrder = asyncHandler(async (req, res) => {
 
   // Apply referral code discount
   if (referralCode) {
-    // First check for admin-generated referral codes
-    const adminReferral = await ReferralCode.findOne({
-      code: referralCode.toUpperCase(),
-      isActive: true,
-      $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }]
-    });
-
-    if (adminReferral && (adminReferral.maxUses === null || adminReferral.usedCount < adminReferral.maxUses)) {
-      if (adminReferral.discountType === 'percentage') {
-        discount = Math.round(subtotal * (adminReferral.discountValue / 100));
-      } else {
-        discount = Math.min(adminReferral.discountValue, subtotal);
-      }
-      // Increment usage count
-      adminReferral.usedCount += 1;
-      await adminReferral.save();
-    } else {
-      // Fallback to user referral codes
-      const referrer = await User.findOne({ referralCode: referralCode.toUpperCase() });
-      if (referrer && !referrer._id.equals(req.user._id)) {
-        // Check if user has already used a referral code (excluding cancelled orders)
-        const existingOrder = await Order.findOne({
-          user: req.user._id,
-          'totals.discount': { $gt: 0 },
-          status: { $ne: 'cancelled' }
-        });
-
-        if (!existingOrder) {
-          discount = Math.round(subtotal * 0.05); // 5% discount
+    const result = await validateReferral(referralCode, req.user._id);
+    
+    if (result.valid) {
+      if (result.type === 'admin') {
+        const adminReferral = result.code;
+        if (adminReferral.discountType === 'percentage') {
+          discount = Math.round(subtotal * (adminReferral.discountValue / 100));
+        } else {
+          discount = Math.min(adminReferral.discountValue, subtotal);
         }
+        // Increment usage count
+        adminReferral.usedCount += 1;
+        await adminReferral.save();
+      } else {
+        // User referral
+        discount = Math.round(subtotal * 0.05); // 5% discount
       }
     }
   }

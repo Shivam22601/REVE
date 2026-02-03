@@ -68,64 +68,30 @@ const getOrders = asyncHandler(async (req, res) => {
   res.json({ orders });
 });
 
+const { validateReferral } = require('../utils/referralUtils');
+
 const validateReferralCode = asyncHandler(async (req, res) => {
   const { code } = req.body;
-  const ReferralCode = require('../models/ReferralCode');
 
-  if (!code) {
-    return res.status(400).json({ message: 'Referral code is required' });
-  }
-
-  // First check for admin-generated referral codes
   try {
-    const adminReferral = await ReferralCode.findOne({
-      code: code.toUpperCase(),
-      isActive: true,
-      $or: [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }]
-    });
+    const result = await validateReferral(code, req.user._id);
 
-    if (adminReferral && (adminReferral.maxUses === null || adminReferral.usedCount < adminReferral.maxUses)) {
-      const discount = adminReferral.discountType === 'percentage' 
-        ? adminReferral.discountValue 
-        : adminReferral.discountValue; // For fixed, show the amount
-      return res.json({
-        valid: true,
-        type: 'admin',
-        discountType: adminReferral.discountType,
-        discountValue: adminReferral.discountValue,
-        discount: discount
-      });
+    if (!result.valid) {
+      return res.status(400).json({ message: result.message });
     }
 
-    // Fallback to user referral codes
-    const referrer = await User.findOne({ referralCode: code.toUpperCase() });
-    
-    if (!referrer) {
-      console.log(`Referral code not found: ${code.toUpperCase()}`);
-      return res.status(400).json({ message: 'Invalid referral code' });
-    }
-
-    if (referrer._id.equals(req.user._id)) {
-      console.log(`User ${req.user._id} tried to use their own code ${code}`);
-      return res.status(400).json({ message: 'Cannot use your own referral code' });
-    }
-
-    // Check if user has already used a referral code
-    const existingOrder = await Order.findOne({
-      user: req.user._id,
-      'totals.discount': { $gt: 0 },
-      status: { $ne: 'cancelled' }
-    });
-
-    if (existingOrder) {
-      return res.status(400).json({ message: 'Referral code already used' });
-    }
+    // Return the successful validation response
+    const discount = result.type === 'admin' 
+      ? result.discountValue // Return value, calculation happens in frontend or order
+      : 5; // User referral is always 5%
 
     res.json({
       valid: true,
-      type: 'user',
-      referrer: { name: referrer.name },
-      discount: 5 // 5% discount
+      type: result.type,
+      discountType: result.discountType,
+      discountValue: result.discountValue,
+      discount: discount, // For compatibility
+      referrer: result.referrer ? { name: result.referrer.name } : undefined
     });
   } catch (error) {
     console.error('Validate Referral Error:', error);
