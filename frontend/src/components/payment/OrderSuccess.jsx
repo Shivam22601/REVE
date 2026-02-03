@@ -2,18 +2,33 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { CheckCircle } from "lucide-react";
 import { motion } from "framer-motion";
 import { useCart } from "../LandingPage/CartContext";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function OrderSuccess() {
   const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
   const orderNumber = location.state?.orderNumber;
+  const [countdown, setCountdown] = useState(5);
 
   useEffect(() => {
     clearCart();
     window.scrollTo({ top: 0, behavior: "smooth" });
-  }, [clearCart]);
+
+    // Auto-redirect to home after 5 seconds
+    const timer = setInterval(() => {
+      setCountdown((prev) => prev - 1);
+    }, 1000);
+
+    const redirect = setTimeout(() => {
+      navigate("/");
+    }, 5000);
+
+    return () => {
+      clearInterval(timer);
+      clearTimeout(redirect);
+    };
+  }, [clearCart, navigate]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-50 to-white px-6">
@@ -55,6 +70,8 @@ export default function OrderSuccess() {
           {orderNumber && (
             <div className="mt-3 font-medium text-gray-700">Order Number: <span className="text-pink-600">{orderNumber}</span></div>
           )}
+          <br />
+          <span className="text-sm text-gray-400">Redirecting to home in {countdown}s...</span>
         </motion.p>
 
         {/* 🎯 Buttons */}

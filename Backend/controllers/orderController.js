@@ -60,6 +60,10 @@ const createOrder = asyncHandler(async (req, res) => {
         // User referral
         discount = Math.round(subtotal * 0.05); // 5% discount
       }
+    } else {
+      // If code is invalid but was provided, we might want to warn or just ignore.
+      // Current logic just ignores it (discount = 0), which is safe.
+      // If strict validation is needed, we could return 400 here.
     }
   }
 

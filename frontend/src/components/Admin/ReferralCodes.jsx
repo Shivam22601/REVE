@@ -209,7 +209,7 @@ const ReferralCodes = () => {
               <tr key={code._id} className="border-t">
                 <td className="px-4 py-3 font-mono">{code.code}</td>
                 <td className="px-4 py-3">
-                  {code.discountType === 'percentage' ? `${code.discountValue}%` : `$${code.discountValue}`}
+                  {code.discountType === 'percentage' ? `${code.discountValue}%` : `₹${code.discountValue}`}
                 </td>
                 <td className="px-4 py-3">
                   {code.usedCount}/{code.maxUses || '∞'}

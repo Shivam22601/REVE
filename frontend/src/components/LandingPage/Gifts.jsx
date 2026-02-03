@@ -3,26 +3,26 @@ export default function GiftGuideSection() {
   const gifts = [
     {
       title: 'Birthday Bundle',
-      price: '$299',
-      originalPrice: '$349',
+      price: '₹299',
+      originalPrice: '₹349',
       items: 'Wireless Earbuds + Smart Watch + Premium Case',
-      save: 'Save $50',
+      save: 'Save ₹50',
       image: 'https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=400&h=300&fit=crop'
     },
     {
       title: 'Work From Home Set',
-      price: '$349',
-      originalPrice: '$419',
+      price: '₹349',
+      originalPrice: '₹419',
       items: 'Earbuds + Laptop Stand + LED Ring Light',
-      save: 'Save $70',
+      save: 'Save ₹70',
       image: 'https://images.unsplash.com/photo-1625019030820-e4ed970a6c95?w=400&h=300&fit=crop'
     },
     {
       title: 'Fitness Package',
-      price: '$279',
-      originalPrice: '$339',
+      price: '₹279',
+      originalPrice: '₹339',
       items: 'Sport Earbuds + Fitness Tracker + Sport Band',
-      save: 'Save $60',
+      save: 'Save ₹60',
       image: 'https://images.unsplash.com/photo-1434494878577-86c23bcb06b9?w=400&h=300&fit=crop'
     }
   ];
