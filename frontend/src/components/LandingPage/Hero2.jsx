@@ -2,10 +2,11 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import img1 from "../../assets/f1.jpg";
-import img2 from "../../assets/f2.jpg";
-import img3 from "../../assets/f3.jpg";
-import img4 from "../../assets/f4.jpg";
+import img1 from "../../assets/f1.jpeg";
+import img2 from "../../assets/f2.jpeg";
+import img3 from "../../assets/f3.jpeg";
+import img4 from "../../assets/f4.jpeg";
+import img5 from "../../assets/f5.jpeg";
 
 const Hero2 = () => {
   const Motion = motion;
@@ -13,7 +14,8 @@ const Hero2 = () => {
     { type: 'image', src: img1 },
     { type: 'image', src: img2 },
     { type: 'image', src: img3 },
-    { type: 'image', src: img4 }
+    { type: 'image', src: img4 },
+    { type: 'image', src: img5 }
   ];
   const [current, setCurrent] = useState(0);
 
@@ -28,16 +30,16 @@ const Hero2 = () => {
   const prevSlide = () => setCurrent((prev) => (prev - 1 + media.length) % media.length);
 
   return (
-    <section className="relative w-full bg-white overflow-hidden object-cover">
+    <section className="relative w-full h-screen overflow-hidden">
       {/* Slider Container */}
-      <div className="relative w-full h-[300px] sm:h-[550px] lg:h-[680px]">
+      <div className="relative w-full h-full">
         <AnimatePresence>
           {media[current].type === 'image' ? (
             <Motion.img
               key={current}
               src={media[current].src}
               alt={`banner-${current}`}
-              className="absolute w-full h-full object-contain overflow-hidden sm:rounded-xl"
+              className="absolute w-full h-full object-cover"
               initial={{ opacity: 0, scale: 1.05 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
@@ -47,7 +49,7 @@ const Hero2 = () => {
             <Motion.video
               key={current}
               src={media[current].src}
-              className="absolute w-full h-full object-cover overflow-hidden sm:rounded-xl"
+              className="absolute w-full h-full object-cover"
               autoPlay
               muted
               loop

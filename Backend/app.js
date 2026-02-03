@@ -6,6 +6,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
+const rateLimit = require('express-rate-limit');
 
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
@@ -27,6 +28,8 @@ const pincodeRoutes = require('./routes/pincodeRoutes');
 
 const app = express();
 
+app.set('trust proxy', parseInt(process.env.TRUST_PROXY_HOPS || '1', 10));
+
 app.use(
   cors({
     origin: true, // Allow all origins temporarily for testing
@@ -43,11 +46,31 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+const apiRateWindowMs = parseInt(process.env.API_RATE_WINDOW_MS || `${15 * 60 * 1000}`, 10);
+const apiRateMax = parseInt(process.env.API_RATE_MAX || '1000', 10);
+const apiLimiter = rateLimit({
+  windowMs: apiRateWindowMs,
+  max: apiRateMax,
+  standardHeaders: true,
+  legacyHeaders: false
+});
+app.use('/api', apiLimiter);
+
+const authRateWindowMs = parseInt(process.env.AUTH_RATE_WINDOW_MS || `${60 * 1000}`, 10);
+const authRateMax = parseInt(process.env.AUTH_RATE_MAX || '10', 10);
+const authLimiter = rateLimit({
+  windowMs: authRateWindowMs,
+  max: authRateMax,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Too many auth attempts, please try again later' }
+});
+
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
 
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
@@ -60,9 +83,8 @@ if (paymentRoutes) {
 app.use('/api/admin', adminRoutes);
 app.use('/api/pincodes', pincodeRoutes);
 
-// Serve frontend static files
 const frontendPath = path.join(__dirname, '../frontend/dist');
-app.use(express.static(frontendPath));
+app.use(express.static(frontendPath, { maxAge: '1d', etag: true, immutable: true }));
 
 app.get(/^(?!\/api).*/, (req, res, next) => {
   if (req.path.startsWith('/api')) {
