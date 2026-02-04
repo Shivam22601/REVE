@@ -110,24 +110,49 @@ const updateProduct = asyncHandler(async (req, res) => {
   }
 
   // Handle images update
-  if (req.body.existingImages !== undefined || req.files?.length) {
+  if (req.body.existingImages !== undefined || req.files?.length || req.body.imageLayout !== undefined) {
     let images = [];
     
-    // Add existing images if provided
-    if (req.body.existingImages) {
+    // Process uploaded files first
+    const newImages = (req.files || []).map((file) => ({
+      url: file.path || file.secure_url,
+      publicId: file.filename || file.public_id
+    }));
+
+    if (req.body.imageLayout) {
       try {
-        images = JSON.parse(req.body.existingImages);
+        const layout = JSON.parse(req.body.imageLayout);
+        let newImageIndex = 0;
+        
+        // Reconstruct images based on layout
+        images = layout.map(item => {
+          if (item.type === 'new') {
+            const img = newImages[newImageIndex];
+            newImageIndex++;
+            return img;
+          } else if (item.type === 'existing') {
+            return { url: item.url, publicId: item.publicId };
+          }
+          return null;
+        }).filter(Boolean);
+        
+        // If there are leftover new images (shouldn't happen if frontend is correct, but for safety), append them
+        if (newImageIndex < newImages.length) {
+          images = [...images, ...newImages.slice(newImageIndex)];
+        }
       } catch (err) {
-        return res.status(400).json({ message: 'Invalid existingImages format' });
+        console.error('Error parsing imageLayout:', err);
+        return res.status(400).json({ message: 'Invalid imageLayout format' });
       }
-    }
-    
-    // Add new uploaded images
-    if (req.files?.length) {
-      const newImages = req.files.map((file) => ({
-        url: file.path || file.secure_url,
-        publicId: file.filename || file.public_id
-      }));
+    } else {
+      // Legacy behavior: Append new images to existing images
+      if (req.body.existingImages) {
+        try {
+          images = JSON.parse(req.body.existingImages);
+        } catch (err) {
+          return res.status(400).json({ message: 'Invalid existingImages format' });
+        }
+      }
       images = [...images, ...newImages];
     }
     

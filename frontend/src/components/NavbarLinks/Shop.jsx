@@ -1,5 +1,5 @@
 import { useState, memo, useEffect } from "react";
-import { Star, ArrowLeft, Sparkles, Heart } from "lucide-react";
+import { Star, ArrowLeft, Sparkles, Heart, Zap } from "lucide-react";
 import { useCart } from "../LandingPage/CartContext";
 import { useWishlist } from "../LandingPage/WishlistContext";
 import { useNavigate } from "react-router-dom";
@@ -10,9 +10,8 @@ const ProductCard = memo(
   ({
     product,
     onClick,
-    onAddToCart,
+    onBuyNow,
     onToggleWishlist,
-    isAdded,
     isWishlisted,
     isHovered,
     onHover,
@@ -73,18 +72,16 @@ const ProductCard = memo(
 
             {/* ACTION BUTTONS */}
             <div className="flex flex-col gap-3">
+              {/* BUY NOW BUTTON */}
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  onAddToCart();
+                  onBuyNow();
                 }}
-                className={`w-full py-3 rounded-xl font-semibold transition ${
-                  isAdded
-                    ? "bg-green-500 text-white"
-                    : "bg-gradient-to-r from-pink-500 to-purple-600 text-white"
-                }`}
+                className="w-full py-3 rounded-xl font-semibold flex items-center justify-center gap-2 transition bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:scale-[1.02] hover:shadow-lg active:scale-95"
               >
-                {isAdded ? "Added to Cart" : "Add to Cart"}
+                <Zap size={20} />
+                Buy Now
               </button>
 
               <button
@@ -121,7 +118,6 @@ ProductCard.displayName = "ProductCard";
 export default function Shop() {
   const [items, setItems] = useState([]);
   const [activeCategory, setActiveCategory] = useState("all");
-  const [addedToCart, setAddedToCart] = useState({});
   const [hoveredProduct, setHoveredProduct] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -184,18 +180,9 @@ export default function Shop() {
           .filter((p) => p.category === activeCategory);
 
   /* ================= ACTIONS ================= */
-  const handleAddToCart = (product) => {
+  const handleBuyNow = (product) => {
     addToCart(product);
-
-    if (addedToCart[product.id]) return;
-
-    setAddedToCart((prev) => ({ ...prev, [product.id]: true }));
-    setTimeout(() => {
-      setAddedToCart((prev) => ({
-        ...prev,
-        [product.id]: false,
-      }));
-    }, 1200);
+    navigate('/cart');
   };
 
   const toggleWishlist = (product) => {
@@ -293,13 +280,12 @@ export default function Shop() {
               onClick={() =>
                 navigate(`/product/${product.id}`)
               }
-              onAddToCart={() =>
-                handleAddToCart(product)
+              onBuyNow={() =>
+                handleBuyNow(product)
               }
               onToggleWishlist={() =>
                 toggleWishlist(product)
               }
-              isAdded={!!addedToCart[product.id]}
               isWishlisted={isWishlisted(product.id)}
               isHovered={hoveredProduct === product.id}
               onHover={setHoveredProduct}

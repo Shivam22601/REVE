@@ -7,6 +7,7 @@ import {
   Heart,
   ShoppingCart,
   Check,
+  Zap,
 } from "lucide-react";
 import { useWishlist } from "./LandingPage/WishlistContext";
 import { useCart } from "./LandingPage/CartContext";
@@ -22,8 +23,11 @@ export default function ProductDetails() {
   const { addToWishlist, removeFromWishlist, wishlist } = useWishlist();
   const { user } = useAuth();
 
-  // ✅ SAME AS SHOP.JSX
-  const [addedToCart, setAddedToCart] = useState(false);
+  // ✅ BUY NOW
+  const handleBuyNow = () => {
+    addToCart(product);
+    navigate('/cart');
+  };
 
   // Scroll to top and fetch product
   const [product, setProduct] = useState(null);
@@ -96,16 +100,6 @@ export default function ProductDetails() {
   const isWishlisted = wishlist.some(
     (item) => item.id === product.id
   );
-
-  // ✅ ADD TO CART (SHOP STYLE)
-  const handleAddToCart = () => {
-    addToCart(product);
-    setAddedToCart(true);
-
-    setTimeout(() => {
-      setAddedToCart(false);
-    }, 1500);
-  };
 
   // ✅ TOGGLE WISHLIST
   const toggleWishlist = () => {
@@ -226,33 +220,20 @@ export default function ProductDetails() {
 
           {/* ACTION BUTTONS */}
           <div className="flex flex-col sm:flex-row gap-4 mt-auto w-full">
-            {/* ADD TO CART (SHOP STYLE) */}
+            {/* BUY NOW */}
             <button
-              onClick={handleAddToCart}
-              className={`
+              onClick={handleBuyNow}
+              className="
                 w-full sm:w-auto
                 flex items-center justify-center gap-2
                 px-6 sm:px-10 py-4
                 rounded-xl font-semibold
                 transition-all duration-200
-                ${
-                  addedToCart
-                    ? "bg-green-500 text-white"
-                    : "bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:scale-[1.02] hover:shadow-lg active:scale-95"
-                }
-              `}
+                bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:scale-[1.02] hover:shadow-lg active:scale-95
+              "
             >
-              {addedToCart ? (
-                <>
-                  <Check size={20} />
-                  Added to Cart
-                </>
-              ) : (
-                <>
-                  <ShoppingCart size={20} />
-                  Add to Cart
-                </>
-              )}
+              <Zap size={20} />
+              Buy Now
             </button>
 
             {/* WISHLIST */}

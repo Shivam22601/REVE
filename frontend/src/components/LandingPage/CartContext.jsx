@@ -1,4 +1,5 @@
 import { createContext, useContext, useMemo, useState } from "react";
+import { userAPI } from "../../config/api";
 
 /* ================= CONTEXT ================= */
 const CartContext = createContext(null);
@@ -81,16 +82,7 @@ export function CartProvider({ children }) {
     if (!code.trim()) return { success: false, message: "Code is required" };
 
     try {
-      const response = await fetch("/api/users/validate-referral", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-        },
-        body: JSON.stringify({ code: code.trim() }),
-      });
-
-      const data = await response.json();
+      const data = await userAPI.validateReferral(code.trim());
 
       if (data.valid) {
         let discount = 0;
@@ -113,7 +105,7 @@ export function CartProvider({ children }) {
         return { success: false, message: data.message };
       }
     } catch (error) {
-      const message = error.response?.data?.message || "Invalid referral code";
+      const message = error.message || "Invalid referral code";
       setReferralError(message);
       setReferralDiscount(0);
       return { success: false, message };

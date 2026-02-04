@@ -41,12 +41,26 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
   }, [product]);
 
   const handleFiles = (e) => {
-    const newFiles = Array.from(e.target.files);
-    setImages([...images.filter(img => !img.url), ...newFiles]); // Keep existing images, add new files
+    const newFiles = Array.from(e.target.files).map(file => ({
+      file,
+      preview: URL.createObjectURL(file),
+      isNew: true
+    }));
+    setImages([...images, ...newFiles]);
   };
 
   const removeImage = (index) => {
     setImages(images.filter((_, i) => i !== index));
+  };
+
+  const moveImage = (index, direction) => {
+    const newImages = [...images];
+    if (direction === 'up' && index > 0) {
+      [newImages[index], newImages[index - 1]] = [newImages[index - 1], newImages[index]];
+    } else if (direction === 'down' && index < newImages.length - 1) {
+      [newImages[index], newImages[index + 1]] = [newImages[index + 1], newImages[index]];
+    }
+    setImages(newImages);
   };
 
   const handleSubmit = async (e) => {
@@ -66,12 +80,22 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     if (flipkartLink) form.append('flipkartLink', flipkartLink);
     form.append('sortOrder', String(sortOrder));
     
-    // Send existing images (those with url)
-    const existingImages = images.filter(img => img.url);
-    form.append('existingImages', JSON.stringify(existingImages));
+    // Prepare image layout and files
+    const imageLayout = [];
+    const newFiles = [];
     
-    // Send new files
-    const newFiles = images.filter(img => !img.url);
+    images.forEach((img) => {
+      if (img.isNew) {
+        // It's a new file
+        imageLayout.push({ type: 'new', index: newFiles.length });
+        newFiles.push(img.file);
+      } else {
+        // It's an existing image
+        imageLayout.push({ type: 'existing', url: img.url, publicId: img.publicId });
+      }
+    });
+
+    form.append('imageLayout', JSON.stringify(imageLayout));
     newFiles.forEach((file) => form.append('images', file));
 
     setLoading(true);
@@ -168,19 +192,40 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
               <h3 className="font-medium mb-2">Images ({images.length})</h3>
               <div className="grid grid-cols-3 gap-2">
                 {images.map((img, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative group border rounded p-1">
                     <img
-                      src={img.url || URL.createObjectURL(img)}
+                      src={img.url || img.preview}
                       alt={`Image ${index + 1}`}
-                      className="w-full h-20 object-cover rounded"
+                      className="w-full h-24 object-cover rounded"
                     />
                     <button
                       type="button"
                       onClick={() => removeImage(index)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs hover:bg-red-600"
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-5 h-5 text-xs hover:bg-red-600 flex items-center justify-center z-10"
+                      title="Remove"
                     >
                       ×
                     </button>
+                    <div className="absolute bottom-1 left-1 right-1 flex justify-between bg-black/50 p-1 rounded opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, 'up')}
+                        disabled={index === 0}
+                        className="text-white hover:text-pink-300 disabled:opacity-30 px-1"
+                        title="Move Up"
+                      >
+                        ↑
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => moveImage(index, 'down')}
+                        disabled={index === images.length - 1}
+                        className="text-white hover:text-pink-300 disabled:opacity-30 px-1"
+                        title="Move Down"
+                      >
+                        ↓
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

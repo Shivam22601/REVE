@@ -5,17 +5,17 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import img1 from "../../assets/f1.jpeg";
 import img2 from "../../assets/f2.jpeg";
 import img3 from "../../assets/f3.jpeg";
-import img4 from "../../assets/f4.jpeg";
-import img5 from "../../assets/f5.jpeg";
+// import img4 from "../../assets/f4.jpeg";
+// import img5 from "../../assets/f5.jpeg";
 
 const Hero2 = () => {
   const Motion = motion;
   const media = [
     { type: 'image', src: img1 },
     { type: 'image', src: img2 },
-    { type: 'image', src: img3 },
-    { type: 'image', src: img4 },
-    { type: 'image', src: img5 }
+    { type: 'image', src: img3 }
+    // { type: 'image', src: img4 },
+    // { type: 'image', src: img5 }
   ];
   const [current, setCurrent] = useState(0);
 

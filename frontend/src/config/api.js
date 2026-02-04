@@ -96,6 +96,7 @@ export const userAPI = {
   // Orders for current user
   getOrders: () => apiCall('/users/orders'),
   cancelOrder: (id) => apiCall(`/users/orders/${id}/cancel`, { method: 'PATCH' }),
+  validateReferral: (code) => apiCall('/users/validate-referral', { method: 'POST', body: { code } }),
 };
 
 // Product API
@@ -184,4 +185,10 @@ export const adminAPI = {
 // Pincode API (Public)
 export const pincodeAPI = {
   verify: (code) => apiCall('/pincodes/verify', { method: 'POST', body: { code } }),
+};
+
+// Payment API
+export const paymentAPI = {
+  createOrder: (data) => apiCall('/payments/order', { method: 'POST', body: data }),
+  verifyPayment: (data) => apiCall('/payments/verify', { method: 'POST', body: data }),
 };
