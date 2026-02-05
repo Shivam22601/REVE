@@ -8,13 +8,18 @@ let storage;
 
 if (useCloudinary) {
   try {
-    const cloudinaryStorage = require('multer-storage-cloudinary');
+    const { CloudinaryStorage } = require('multer-storage-cloudinary');
     const cloudinary = require('./cloudinary');
-    storage = cloudinaryStorage({
+    storage = new CloudinaryStorage({
       cloudinary,
       params: {
         folder: process.env.CLOUDINARY_FOLDER || 'ecommerce',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp']
+        resource_type: 'image',
+        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+        public_id: (_req, file) => {
+          const base = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9_-]/g, '');
+          return `${Date.now()}-${Math.round(Math.random() * 1e9)}-${base}`;
+        }
       }
     });
   } catch (error) {
@@ -37,9 +42,10 @@ if (!storage) {
   });
 }
 
+const maxMb = parseInt(process.env.UPLOAD_MAX_FILE_SIZE_MB || '10', 10);
 const upload = multer({
   storage,
-  limits: { fileSize: 2 * 1024 * 1024 }
+  limits: { fileSize: maxMb * 1024 * 1024 }
 });
 
 module.exports = upload;
