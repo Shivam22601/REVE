@@ -8,9 +8,9 @@ let storage;
 
 if (useCloudinary) {
   try {
-    const { CloudinaryStorage } = require('multer-storage-cloudinary');
+    const cloudinaryStorage = require('multer-storage-cloudinary');
     const cloudinary = require('./cloudinary');
-    storage = new CloudinaryStorage({
+    storage = cloudinaryStorage({
       cloudinary,
       params: {
         folder: process.env.CLOUDINARY_FOLDER || 'ecommerce',
