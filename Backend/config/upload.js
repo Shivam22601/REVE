@@ -12,14 +12,14 @@ if (useCloudinary) {
     const cloudinary = require('./cloudinary');
     storage = cloudinaryStorage({
       cloudinary,
-      params: {
-        folder: process.env.CLOUDINARY_FOLDER || 'ecommerce',
-        resource_type: 'image',
-        allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
-        public_id: (_req, file) => {
-          const base = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9_-]/g, '');
-          return `${Date.now()}-${Math.round(Math.random() * 1e9)}-${base}`;
-        }
+      params: (_req, file) => {
+        const base = path.parse(file.originalname).name.replace(/[^a-zA-Z0-9_-]/g, '');
+        return {
+          folder: process.env.CLOUDINARY_FOLDER || 'ecommerce',
+          resource_type: 'image',
+          allowed_formats: ['jpg', 'jpeg', 'png', 'webp'],
+          public_id: `${Date.now()}-${Math.round(Math.random() * 1e9)}-${base}`
+        };
       }
     });
   } catch (error) {
@@ -49,5 +49,3 @@ const upload = multer({
 });
 
 module.exports = upload;
-
-
