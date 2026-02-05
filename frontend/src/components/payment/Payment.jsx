@@ -17,10 +17,45 @@ export default function Payment() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
 
+  const handleFreeOrder = async (selectedAddress) => {
+    setLoading(true);
+    try {
+      const payload = {
+        items: cart.map((i) => ({ product: i.id, quantity: i.quantity })),
+        shippingAddress: selectedAddress,
+        paymentProvider: 'free',
+        paymentIntentId: `free_${Date.now()}`,
+        referralCode: referralCode || undefined,
+        totals: {
+          subtotal: cartSummary.subtotal,
+          tax: cartSummary.gstAmount,
+          shipping: cartSummary.shipping,
+          discount: cartSummary.discount,
+          grandTotal: cartSummary.grandTotal
+        }
+      };
+
+      const res = await orderAPI.createOrder(payload);
+      clearCart();
+      navigate('/order-success', { state: { orderId: res._id, orderNumber: res.orderNumber } });
+      toast.success('Order Placed Successfully!');
+    } catch (err) {
+      console.error('Free order creation failed:', err);
+      toast.error(err.message || 'Failed to place order');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleRazorpayPayment = async () => {
     if (!user) {
       toast.error('Please login to place an order');
       return navigate('/login');
+    }
+
+    if (!cart || cart.length === 0) {
+      toast.error('Your cart is empty');
+      return navigate('/cart');
     }
 
     if (!user.addresses || user.addresses.length === 0) {
@@ -31,8 +66,20 @@ export default function Payment() {
     // Use default address or first one
     const selectedAddress = user.addresses.find(a => a.isDefault) || user.addresses[0];
 
+    // Check for free order or invalid amount
+    if (cartSummary.grandTotal <= 0 || isNaN(cartSummary.grandTotal)) {
+      if (isNaN(cartSummary.grandTotal)) {
+        toast.error("Invalid cart total. Please refresh.");
+        return;
+      }
+      handleFreeOrder(selectedAddress);
+      return;
+    }
+
     setLoading(true);
     try {
+      console.log('Initiating payment for amount:', cartSummary.grandTotal);
+      
       // 1. Create Order on Backend (Razorpay)
       const orderData = await paymentAPI.createOrder({ 
         amount: cartSummary.grandTotal,

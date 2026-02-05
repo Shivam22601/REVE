@@ -6,6 +6,10 @@ const key_secret = process.env.RAZORPAY_KEY_SECRET;
 
 const razorpay = (key_id && key_secret) ? new Razorpay({ key_id, key_secret }) : null;
 
+if (!razorpay) {
+  console.warn('⚠️ Razorpay not configured: Missing RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET');
+}
+
 const createOrder = async ({ amount, currency = 'INR', receipt }) => {
   if (!razorpay) throw new Error('Razorpay not configured');
   return razorpay.orders.create({
