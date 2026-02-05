@@ -2,7 +2,6 @@ const asyncHandler = require('../utils/asyncHandler');
 const { createOrder, verifySignature } = require('../services/paymentService');
 
 const createPaymentOrder = asyncHandler(async (req, res) => {
-  console.log('Payment Request Body:', req.body);
   const { amount, currency = 'INR' } = req.body;
   if (!amount) {
     console.error('Payment Error: Amount missing');

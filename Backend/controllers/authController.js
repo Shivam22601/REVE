@@ -37,8 +37,8 @@ const register = asyncHandler(async (req, res) => {
 
   // Generate 6-digit OTP
   let otp;
-  // Ensure uniqueness if needed, but for OTPs simple random is usually enough per user
-  otp = Math.floor(100000 + Math.random() * 900000).toString();
+  // Use crypto for secure OTP generation
+  otp = crypto.randomInt(100000, 1000000).toString();
 
   // Generate unique referral code
   let userReferralCode;

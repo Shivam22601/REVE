@@ -18,13 +18,11 @@ export default function WarrantyPage() {
 
   const handleActivate = (e) => {
     e.preventDefault();
-    console.log("Warranty Activated:", formData);
     alert("Warranty activated successfully 🎉");
   };
 
   const handleClaim = (e) => {
     e.preventDefault();
-    console.log("Warranty Claim Submitted:", formData);
     alert("Warranty claim submitted 💖 Our team will contact you.");
   };
 

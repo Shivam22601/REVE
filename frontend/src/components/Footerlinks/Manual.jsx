@@ -19,12 +19,9 @@ export default function Manual() {
         setLoading(true);
         
         // Fetch all manuals from public API
-        console.log('Fetching all manuals...');
         const allManuals = await productAPI.getAllManuals();
-        console.log('All manuals received:', allManuals);
         
         if (allManuals && allManuals.length > 0) {
-          console.log('Found manuals:', allManuals.length);
           // Use the first manual and its product info
           const firstManual = allManuals[0];
           setManualData({
@@ -39,26 +36,21 @@ export default function Manual() {
         }
         
         // If no manuals found, try specific product IDs as fallback
-        console.log('No manuals found, trying specific product IDs...');
         for (const productId of productIds) {
           try {
-            console.log('Trying product ID:', productId);
             const data = await productAPI.getProductManuals(productId);
-            console.log('Manual data for product', productId, ':', data);
             
             if (data.manuals && data.manuals.length > 0) {
-              console.log('Found manuals for product', productId);
               setManualData(data);
               setSelectedManual(data.manuals[0]);
               return;
             }
           } catch (err) {
-            console.log('No manuals for product', productId, err.message);
+            // Continue to next ID
           }
         }
         
         // If still no manuals, show empty state
-        console.log('No manuals found anywhere');
         setManualData({ product: { name: 'Product', image: null }, manuals: [] });
         
       } catch (err) {

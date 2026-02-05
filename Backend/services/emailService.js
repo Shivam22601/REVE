@@ -30,14 +30,7 @@ const sendVerificationEmail = async (user, otp) => {
       html: mail.html
     });
 
-    console.log('Verification email sent', {
-      to: user.email,
-      accepted: info.accepted,
-      rejected: info.rejected,
-      messageId: info.messageId,
-      provider: transporter.provider,
-      statusCode: info.statusCode
-    });
+    console.log('Verification email sent to', user.email);
 
     return info;
   } catch (err) {
@@ -59,14 +52,7 @@ const sendResetEmail = async (user, link) => {
       html: mail.html
     });
 
-    console.log('Reset password email sent', {
-      to: user.email,
-      accepted: info.accepted,
-      rejected: info.rejected,
-      messageId: info.messageId,
-      provider: transporter.provider,
-      statusCode: info.statusCode
-    });
+    console.log('Reset password email sent to', user.email);
 
     return info;
   } catch (err) {
@@ -88,14 +74,7 @@ const sendOrderConfirmation = async (user, order) => {
       html: mail.html
     });
 
-    console.log('Order confirmation email sent', {
-      to: user.email,
-      accepted: info.accepted,
-      rejected: info.rejected,
-      messageId: info.messageId,
-      provider: transporter.provider,
-      statusCode: info.statusCode
-    });
+    console.log('Order confirmation email sent to', user.email);
 
     return info;
   } catch (err) {

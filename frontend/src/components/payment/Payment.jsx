@@ -78,7 +78,6 @@ export default function Payment() {
 
     setLoading(true);
     try {
-      console.log('Initiating payment for amount:', cartSummary.grandTotal);
       
       // 1. Create Order on Backend (Razorpay)
       const orderData = await paymentAPI.createOrder({ 
@@ -175,13 +174,7 @@ export default function Payment() {
           {loading && <span className="text-sm text-gray-500 ml-auto">Processing...</span>}
         </button>
 
-        <button
-          onClick={() => navigate("/payment/cod")}
-          className="w-full flex items-center gap-4 p-4 mb-3 rounded-xl border hover:border-pink-500 transition"
-        >
-          <span className="text-pink-600"><Truck /></span>
-          <span className="font-medium">Cash on Delivery</span>
-        </button>
+        
       </div>
     </div>
   );
