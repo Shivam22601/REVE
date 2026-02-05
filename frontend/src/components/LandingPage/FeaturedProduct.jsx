@@ -6,11 +6,11 @@ import { productAPI } from "../../config/api";
 // 🎥 VIDEOS
 import video1 from "../../assets/v1.mp4";
 import video2 from "../../assets/v2.mp4";
-import video3 from "../../assets/v3.mp4";
+import video3 from "../../assets/v3.mp4"; 
 
 export default function FeaturedProduct() {
   const Motion = motion;
-  const navigate = useNavigate();
+  const navigate = useNavigate(); 
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
