@@ -6,6 +6,9 @@ const apiCall = async (endpoint, options = {}) => {
   let token = localStorage.getItem('accessToken');
   const isFormData = options.body instanceof FormData;
   const defaultHeaders = isFormData ? {} : { 'Content-Type': 'application/json' };
+  const timeoutMs = typeof options.timeoutMs === 'number' ? options.timeoutMs : 45000;
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
   const makeConfig = (t) => ({
     headers: {
@@ -14,6 +17,7 @@ const apiCall = async (endpoint, options = {}) => {
       ...options.headers,
     },
     credentials: 'include',
+    signal: controller.signal,
     ...options,
   });
 
@@ -67,8 +71,13 @@ const apiCall = async (endpoint, options = {}) => {
 
     throw new Error(data.message || 'Request failed');
   } catch (error) {
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${Math.round(timeoutMs / 1000)}s`);
+    }
     console.error('API Error:', error);
     throw error;
+  } finally {
+    clearTimeout(timeoutId);
   }
 };
 
@@ -152,11 +161,13 @@ export const adminAPI = {
     method: 'POST',
     body: formData,
     headers: {},
+    timeoutMs: 120000,
   }),
   updateProduct: (id, formData) => apiCall(`/admin/products/${id}`, {
     method: 'PUT',
     body: formData,
     headers: {},
+    timeoutMs: 120000,
   }),
   deleteProduct: (id) => apiCall(`/admin/products/${id}`, { method: 'DELETE' }),
   // Category management

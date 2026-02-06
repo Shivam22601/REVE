@@ -105,7 +105,7 @@ const AdminPanel = () => {
     }
   }, [logout, navigate]);
 
-  useEffect(() => {
+  useEffect(() => { 
     if (activeTab === 'users') loadUsers();
     if (activeTab === 'orders') loadOrders();
     if (activeTab === 'products') loadProducts();

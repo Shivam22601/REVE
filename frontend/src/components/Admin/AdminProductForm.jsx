@@ -40,13 +40,48 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     setError('');
   }, [product]);
 
-  const handleFiles = (e) => {
-    const newFiles = Array.from(e.target.files).map(file => ({
-      file,
-      preview: URL.createObjectURL(file),
-      isNew: true
-    }));
-    setImages([...images, ...newFiles]);
+  const compressImage = (file) =>
+    new Promise((resolve) => {
+      const img = new Image();
+      const reader = new FileReader();
+      reader.onload = () => {
+        img.onload = () => {
+          const MAX_WIDTH = 1200;
+          const scale = Math.min(1, MAX_WIDTH / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(
+            (blob) => {
+              // Fallback to original if compression fails
+              resolve(blob ? new File([blob], file.name.replace(/\.(png|jpg|jpeg)$/i, '.webp'), { type: blob.type }) : file);
+            },
+            'image/webp',
+            0.7
+          );
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+
+  const handleFiles = async (e) => {
+    const selected = Array.from(e.target.files || []);
+    const processed = await Promise.all(
+      selected.map(async (file) => {
+        try {
+          const compressed = await compressImage(file);
+          const preview = URL.createObjectURL(compressed);
+          return { file: compressed, preview, isNew: true };
+        } catch {
+          const fallbackPreview = URL.createObjectURL(file);
+          return { file, preview: fallbackPreview, isNew: true };
+        }
+      })
+    );
+    setImages([...images, ...processed]);
   };
 
   const removeImage = (index) => {
@@ -68,6 +103,19 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
     setError('');
     if (!name || !price) {
       setError('Name and price are required');
+      return;
+    }
+    if (!category) {
+      setError('Please select a category');
+      return;
+    }
+    const MAX_MB = 10;
+    const oversize = images
+      .filter(i => i.isNew)
+      .map(i => i.file)
+      .find(f => f && f.size > MAX_MB * 1024 * 1024);
+    if (oversize) {
+      setError(`One or more images exceed ${MAX_MB}MB. Please upload smaller files.`);
       return;
     }
 
@@ -182,6 +230,7 @@ const AdminProductForm = ({ onClose, onCreated, product }) => {
 
           <input
             type="file"
+            accept="image/*"
             multiple
             onChange={handleFiles}
             className="border p-2 rounded"

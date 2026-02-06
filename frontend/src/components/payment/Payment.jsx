@@ -107,7 +107,7 @@ export default function Payment() {
               items: cart.map((i) => ({ product: i.id, quantity: i.quantity })),
               shippingAddress: selectedAddress,
               paymentProvider: 'razorpay',
-              paymentIntentId: response.razorpay_payment_id,
+              paymentIntentId: response.razorpay_payment_id, 
               referralCode: referralCode || undefined,
               totals: {
                 subtotal: cartSummary.subtotal,

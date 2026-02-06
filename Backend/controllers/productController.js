@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const cloudinary = require('cloudinary').v2;
 const Product = require('../models/Product');
 const Category = require('../models/Category');
 const Review = require('../models/Review');
@@ -17,6 +18,21 @@ const buildQuery = (query) => {
   }
   return filter;
 };
+
+const trim = (s) => (typeof s === 'string' ? s.trim() : '');
+const cloudinaryEnabled = String(process.env.CLOUDINARY_ENABLED || '').toLowerCase() === 'true';
+const hasCloudinary =
+  !!trim(process.env.CLOUDINARY_CLOUD_NAME) &&
+  !!trim(process.env.CLOUDINARY_API_KEY) &&
+  !!trim(process.env.CLOUDINARY_API_SECRET);
+const folderPrefix = trim(process.env.CLOUDINARY_FOLDER) || trim(process.env.CLOUDINARY_FOLDER_PREFIX) || 'reve';
+if (cloudinaryEnabled && hasCloudinary) {
+  cloudinary.config({
+    cloud_name: trim(process.env.CLOUDINARY_CLOUD_NAME),
+    api_key: trim(process.env.CLOUDINARY_API_KEY),
+    api_secret: trim(process.env.CLOUDINARY_API_SECRET)
+  });
+}
 
 // Utility: accept features in multiple formats (array, comma/newline-separated string, or description fallbacks)
 const parseFeatures = (input) => {
@@ -84,15 +100,42 @@ const createProduct = asyncHandler(async (req, res) => {
   // Normalize features: accept features[] or features string or fallback to description
   const features = parseFeatures(req.body.features ?? req.body.description);
 
+  const toImage = (file) => {
+    const isHttp = typeof file.path === 'string' && /^https?:\/\//i.test(file.path);
+    const url =
+      file.secure_url ||
+      (isHttp ? file.path : (file.filename ? `/uploads/${file.filename}` : undefined));
+    const publicId = file.public_id || file.filename;
+    return { url, publicId };
+  };
+
+  let images = [];
+  if (cloudinaryEnabled && hasCloudinary && Array.isArray(req.files) && req.files.length) {
+    try {
+      const folder = `${folderPrefix}/products`;
+      const uploaded = await Promise.all(
+        req.files.map((f) =>
+          cloudinary.uploader.upload(f.path, {
+            folder,
+            resource_type: 'image',
+            transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
+          })
+        )
+      );
+      images = uploaded.map((r) => ({ url: r.secure_url, publicId: r.public_id }));
+    } catch (_e) {
+      images = (req.files || []).map(toImage).filter((img) => img.url);
+    }
+  } else {
+    images = (req.files || []).map(toImage).filter((img) => img.url);
+  }
+
   const product = await Product.create({
     ...req.body,
     price: Number(price),
     sortOrder: req.body.sortOrder !== undefined ? Number(req.body.sortOrder) : 0,
     features,
-    images: (req.files || []).map((file) => ({
-      url: file.path || file.secure_url,
-      publicId: file.filename || file.public_id
-    }))
+    images
   });
   res.status(201).json(product);
 });
@@ -114,10 +157,34 @@ const updateProduct = asyncHandler(async (req, res) => {
     let images = [];
     
     // Process uploaded files first
-    const newImages = (req.files || []).map((file) => ({
-      url: file.path || file.secure_url,
-      publicId: file.filename || file.public_id
-    }));
+    const toImage = (file) => {
+      const isHttp = typeof file.path === 'string' && /^https?:\/\//i.test(file.path);
+      const url =
+        file.secure_url ||
+        (isHttp ? file.path : (file.filename ? `/uploads/${file.filename}` : undefined));
+      const publicId = file.public_id || file.filename;
+      return { url, publicId };
+    };
+    let newImages = [];
+    if (cloudinaryEnabled && hasCloudinary && Array.isArray(req.files) && req.files.length) {
+      try {
+        const folder = `${folderPrefix}/products`;
+        const uploaded = await Promise.all(
+          req.files.map((f) =>
+            cloudinary.uploader.upload(f.path, {
+              folder,
+              resource_type: 'image',
+              transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
+            })
+          )
+        );
+        newImages = uploaded.map((r) => ({ url: r.secure_url, publicId: r.public_id }));
+      } catch (_e) {
+        newImages = (req.files || []).map(toImage).filter((img) => img.url);
+      }
+    } else {
+      newImages = (req.files || []).map(toImage).filter((img) => img.url);
+    }
 
     if (req.body.imageLayout) {
       try {
@@ -265,4 +332,3 @@ module.exports = {
   getProductManuals,
   getAllManuals
 };
-

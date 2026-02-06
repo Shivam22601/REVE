@@ -7,6 +7,7 @@ const morgan = require('morgan');
 const cookieParser = require('cookie-parser');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
+const https = require('https');
 
 const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const authRoutes = require('./routes/authRoutes');
@@ -69,6 +70,22 @@ const authLimiter = rateLimit({
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', uptime: process.uptime() });
 });
+
+// Cloudinary global config (safe no-op if env missing)
+try {
+  const cloudinary = require('cloudinary').v2;
+  const trim = (s) => (typeof s === 'string' ? s.trim() : '');
+  const cloudName = trim(process.env.CLOUDINARY_CLOUD_NAME);
+  const apiKey = trim(process.env.CLOUDINARY_API_KEY);
+  const apiSecret = trim(process.env.CLOUDINARY_API_SECRET);
+  if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret
+    });
+  }
+} catch (_e) {}
 
 app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);

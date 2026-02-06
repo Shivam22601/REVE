@@ -18,8 +18,8 @@ const startServer = async () => {
     const server = http.createServer(app);
 
     server.keepAliveTimeout = parseInt(process.env.KEEP_ALIVE_TIMEOUT || '65000', 10);
-    server.headersTimeout = parseInt(process.env.HEADERS_TIMEOUT || '66000', 10);
-    server.requestTimeout = parseInt(process.env.REQUEST_TIMEOUT || '30000', 10);
+    server.headersTimeout = parseInt(process.env.HEADERS_TIMEOUT || '180000', 10);
+    server.requestTimeout = parseInt(process.env.REQUEST_TIMEOUT || '120000', 10);
 
     // Gracefully handle server errors (e.g., EADDRINUSE)
     server.on('error', (err) => {
