@@ -24,7 +24,7 @@ const Navbar2 = () => {
   useEffect(() => {
     let mounted = true;
     productAPI
-      .getProducts({ limit: 100 })
+      .getProducts({ limit: 100, sort: 'sortOrder -createdAt _id' })
       .then((res) => {
         // 🔴 IMPORTANT: backend ke hisaab se adjust kar sakte ho
         setItems(res?.data?.products || res?.data || []);

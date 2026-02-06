@@ -161,7 +161,7 @@ export default function Shop() {
 
     setLoading(true);
     productAPI
-      .getProducts({ limit: 50 })
+      .getProducts({ limit: 50, sort: 'sortOrder -createdAt _id' })
       .then((res) => {
         const products =
           res?.data?.products || res?.data || [];

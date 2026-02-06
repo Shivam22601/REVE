@@ -100,34 +100,29 @@ const createProduct = asyncHandler(async (req, res) => {
   // Normalize features: accept features[] or features string or fallback to description
   const features = parseFeatures(req.body.features ?? req.body.description);
 
-  const toImage = (file) => {
-    const isHttp = typeof file.path === 'string' && /^https?:\/\//i.test(file.path);
-    const url =
-      file.secure_url ||
-      (isHttp ? file.path : (file.filename ? `/uploads/${file.filename}` : undefined));
-    const publicId = file.public_id || file.filename;
-    return { url, publicId };
-  };
-
   let images = [];
-  if (cloudinaryEnabled && hasCloudinary && Array.isArray(req.files) && req.files.length) {
+  if (Array.isArray(req.files) && req.files.length) {
+    if (!(cloudinaryEnabled && hasCloudinary)) {
+      return res.status(500).json({ message: 'Image upload service not configured' });
+    }
     try {
       const folder = `${folderPrefix}/products`;
-      const uploaded = await Promise.all(
-        req.files.map((f) =>
-          cloudinary.uploader.upload(f.path, {
-            folder,
-            resource_type: 'image',
-            transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
-          })
-        )
-      );
-      images = uploaded.map((r) => ({ url: r.secure_url, publicId: r.public_id }));
+      const uploadBuffer = (file) =>
+        new Promise((resolve, reject) => {
+          const s = cloudinary.uploader.upload_stream(
+            {
+              folder,
+              resource_type: 'image',
+              transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
+            },
+            (e, r) => (e ? reject(e) : resolve({ url: r.secure_url, publicId: r.public_id }))
+          );
+          s.end(file.buffer);
+        });
+      images = await Promise.all(req.files.map((f) => uploadBuffer(f)));
     } catch (_e) {
-      images = (req.files || []).map(toImage).filter((img) => img.url);
+      return res.status(500).json({ message: 'Image upload failed' });
     }
-  } else {
-    images = (req.files || []).map(toImage).filter((img) => img.url);
   }
 
   const product = await Product.create({
@@ -157,33 +152,31 @@ const updateProduct = asyncHandler(async (req, res) => {
     let images = [];
     
     // Process uploaded files first
-    const toImage = (file) => {
-      const isHttp = typeof file.path === 'string' && /^https?:\/\//i.test(file.path);
-      const url =
-        file.secure_url ||
-        (isHttp ? file.path : (file.filename ? `/uploads/${file.filename}` : undefined));
-      const publicId = file.public_id || file.filename;
-      return { url, publicId };
-    };
     let newImages = [];
-    if (cloudinaryEnabled && hasCloudinary && Array.isArray(req.files) && req.files.length) {
+    if (Array.isArray(req.files) && req.files.length) {
+      if (!(cloudinaryEnabled && hasCloudinary)) {
+        return res.status(500).json({ message: 'Image upload service not configured' });
+      }
       try {
         const folder = `${folderPrefix}/products`;
-        const uploaded = await Promise.all(
-          req.files.map((f) =>
-            cloudinary.uploader.upload(f.path, {
-              folder,
-              resource_type: 'image',
-              transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
-            })
-          )
-        );
-        newImages = uploaded.map((r) => ({ url: r.secure_url, publicId: r.public_id }));
+        const uploadBuffer = (file) =>
+          new Promise((resolve, reject) => {
+            const s = cloudinary.uploader.upload_stream(
+              {
+                folder,
+                resource_type: 'image',
+                transformation: [{ width: 1200, height: 1200, crop: 'limit' }]
+              },
+              (e, r) => (e ? reject(e) : resolve({ url: r.secure_url, publicId: r.public_id }))
+            );
+            s.end(file.buffer);
+          });
+        newImages = await Promise.all(req.files.map((f) => uploadBuffer(f)));
       } catch (_e) {
-        newImages = (req.files || []).map(toImage).filter((img) => img.url);
+        return res.status(500).json({ message: 'Image upload failed' });
       }
     } else {
-      newImages = (req.files || []).map(toImage).filter((img) => img.url);
+      newImages = [];
     }
 
     if (req.body.imageLayout) {

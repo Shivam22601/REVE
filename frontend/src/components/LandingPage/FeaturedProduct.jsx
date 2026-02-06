@@ -19,7 +19,7 @@ export default function FeaturedProduct() {
     let mounted = true;
     setLoading(true);
     productAPI
-      .getProducts({ limit: 8 })
+      .getProducts({ limit: 8, sort: 'sortOrder -createdAt _id' })
       .then((res) => {
         if (!mounted) return;
         setItems((res && res.data) || []);
