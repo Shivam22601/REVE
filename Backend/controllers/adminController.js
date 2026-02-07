@@ -3,6 +3,21 @@ const Order = require('../models/Order');
 const Product = require('../models/Product');
 const ReferralCode = require('../models/ReferralCode');
 const Manual = require('../models/Manual');
+const cloudinary = require('cloudinary').v2;
+const trim = (s) => (typeof s === 'string' ? s.trim() : '');
+const cloudinaryEnabled = String(process.env.CLOUDINARY_ENABLED || '').toLowerCase() === 'true';
+const hasCloudinary =
+  !!trim(process.env.CLOUDINARY_CLOUD_NAME) &&
+  !!trim(process.env.CLOUDINARY_API_KEY) &&
+  !!trim(process.env.CLOUDINARY_API_SECRET);
+const folderPrefix = trim(process.env.CLOUDINARY_FOLDER) || trim(process.env.CLOUDINARY_FOLDER_PREFIX) || 'reve';
+if (cloudinaryEnabled && hasCloudinary) {
+  cloudinary.config({
+    cloud_name: trim(process.env.CLOUDINARY_CLOUD_NAME),
+    api_key: trim(process.env.CLOUDINARY_API_KEY),
+    api_secret: trim(process.env.CLOUDINARY_API_SECRET)
+  });
+}
 const asyncHandler = require('../utils/asyncHandler');
 
 const dashboard = asyncHandler(async (_req, res) => {
@@ -135,6 +150,27 @@ const createManual = asyncHandler(async (req, res) => {
     return res.status(400).json({ message: 'Manual already exists for this product' });
   }
 
+  let images = [];
+  if (Array.isArray(req.files) && req.files.length) {
+    if (!(cloudinaryEnabled && hasCloudinary)) {
+      return res.status(500).json({ message: 'Image upload service not configured' });
+    }
+    const folder = `${folderPrefix}/manuals`;
+    const uploadBuffer = (file) =>
+      new Promise((resolve, reject) => {
+        const s = cloudinary.uploader.upload_stream(
+          {
+            folder,
+            resource_type: 'image',
+            transformation: [{ width: 1600, height: 1600, crop: 'limit' }]
+          },
+          (e, r) => (e ? reject(e) : resolve({ url: r.secure_url, public_id: r.public_id }))
+        );
+        s.end(file.buffer);
+      });
+    const uploaded = await Promise.all(req.files.map((f) => uploadBuffer(f)));
+    images = uploaded.map((r) => ({ url: r.url, public_id: r.public_id, alt: req.body.title || 'Manual image' }));
+  }
   const manual = await Manual.create({
     product: productId,
     title,
@@ -143,11 +179,7 @@ const createManual = asyncHandler(async (req, res) => {
     features: Array.isArray(features) ? features : (features ? features.split('\n').filter(f => f.trim()) : []),
     usage: Array.isArray(usage) ? usage : (usage ? usage.split('\n').filter(u => u.trim()) : []),
     care: Array.isArray(care) ? care : (care ? care.split('\n').filter(c => c.trim()) : []),
-    images: (req.files || []).map((file) => ({
-      url: file.path || file.secure_url,
-      public_id: file.filename || file.public_id,
-      alt: req.body.title || 'Manual image'
-    }))
+    images
   });
 
   res.status(201).json(manual);
@@ -167,14 +199,25 @@ const updateManual = asyncHandler(async (req, res) => {
   };
 
   // Add new images if uploaded
-  if (req.files && req.files.length > 0) {
-    const newImages = req.files.map((file) => ({
-      url: file.path || file.secure_url,
-      public_id: file.filename || file.public_id,
-      alt: title || 'Manual image'
-    }));
-    
-    // Get current manual and add images
+  if (Array.isArray(req.files) && req.files.length) {
+    if (!(cloudinaryEnabled && hasCloudinary)) {
+      return res.status(500).json({ message: 'Image upload service not configured' });
+    }
+    const folder = `${folderPrefix}/manuals`;
+    const uploadBuffer = (file) =>
+      new Promise((resolve, reject) => {
+        const s = cloudinary.uploader.upload_stream(
+          {
+            folder,
+            resource_type: 'image',
+            transformation: [{ width: 1600, height: 1600, crop: 'limit' }]
+          },
+          (e, r) => (e ? reject(e) : resolve({ url: r.secure_url, public_id: r.public_id }))
+        );
+        s.end(file.buffer);
+      });
+    const uploaded = await Promise.all(req.files.map((f) => uploadBuffer(f)));
+    const newImages = uploaded.map((r) => ({ url: r.url, public_id: r.public_id, alt: title || 'Manual image' }));
     const currentManual = await Manual.findById(req.params.id);
     if (currentManual) {
       currentManual.images.push(...newImages);
