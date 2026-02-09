@@ -80,8 +80,9 @@ const Navbar2 = () => {
               {[
                 ["/", "HOME"],
                 ["/shop", "SHOP"],
-                ["/about", "ABOUT US"],
+                ["/aboutAs", "ABOUT US"],
                 ["/support", "SUPPORT"],
+                ["/feedback", "FEEDBACK"],
               ].map(([path, label]) => (
                 <Link
                   key={path}
@@ -209,8 +210,9 @@ const Navbar2 = () => {
               {[
                 ["/", "HOME"],
                 ["/shop", "SHOP"],
-                ["/about", "ABOUT US"],
+                ["/aboutAs", "ABOUT US"],
                 ["/support", "SUPPORT"],
+                 ["/feedback", "FEEDBACK"],
               ].map(([path, label]) => (
                 <Link
                   key={path}

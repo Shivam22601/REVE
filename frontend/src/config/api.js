@@ -140,6 +140,11 @@ export const orderAPI = {
   getReturnRequests: () => apiCall('/orders/returns'),
 };
 
+// Feedback API (Public submission)
+export const feedbackAPI = {
+  submit: (data) => apiCall('/feedback', { method: 'POST', body: data }),
+};
+
 // Admin API
 export const adminAPI = {
   dashboard: () => apiCall('/admin/dashboard'),
@@ -191,6 +196,8 @@ export const adminAPI = {
   addPincode: (data) => apiCall('/pincodes', { method: 'POST', body: data }),
   bulkAddPincodes: (data) => apiCall('/pincodes/bulk', { method: 'POST', body: data }),
   deletePincode: (id) => apiCall(`/pincodes/${id}`, { method: 'DELETE' }),
+  // Feedback management
+  getFeedback: () => apiCall('/admin/feedback'),
 };
 
 // Pincode API (Public)

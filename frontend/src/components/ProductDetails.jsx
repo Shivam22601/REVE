@@ -5,9 +5,9 @@ import {
   ArrowLeft,
   Star,
   Heart,
-  ShoppingCart,
-  Check,
   Zap,
+  CheckCircle,
+  ExternalLink,
 } from "lucide-react";
 import { useWishlist } from "./LandingPage/WishlistContext";
 import { useCart } from "./LandingPage/CartContext";
@@ -18,362 +18,239 @@ export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // ✅ Cart & Wishlist
   const { addToCart } = useCart();
   const { addToWishlist, removeFromWishlist, wishlist } = useWishlist();
   const { user } = useAuth();
 
-  // ✅ BUY NOW
-  const handleBuyNow = () => {
-    addToCart(product);
-    navigate('/cart');
-  };
-
-  // Scroll to top and fetch product
   const [product, setProduct] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [reviews, setReviews] = useState([]);
+
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
-  const [reviewComment, setReviewComment] = useState('');
+  const [reviewComment, setReviewComment] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: "smooth" });
-    let mounted = true;
     setLoading(true);
+
     productAPI
       .getProduct(id)
       .then((res) => {
-        if (!mounted) return;
         const p = res.product;
-        const reviewsData = res.reviews || [];
-        
-        // Client-side fallback parsing: use p.features if present, otherwise try description or tags
-        const parseDescToFeatures = (desc) => {
-          if (!desc) return [];
-          const byNewline = desc.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-          if (byNewline.length > 1) return byNewline;
-          const byComma = desc.split(',').map(s => s.trim()).filter(Boolean);
-          if (byComma.length > 1) return byComma;
-          return desc.split(/[.?!]\s+/).map(s => s.trim()).filter(Boolean);
-        };
-
         setProduct({
           id: p._id,
           name: p.name,
           salePrice: p.salePrice ?? p.price,
-          image: p.images?.[0]?.url || "/placeholder.png",
-          images: p.images,
-          rating: p.averageRating,
-          reviews: p.totalReviews,
-          flipkartLink: p.flipkartLink,
-          features: Array.isArray(p.features) && p.features.length ? p.features : (p.description ? parseDescToFeatures(p.description) : (p.tags || [])),
-          description: p.description,
+          images: p.images || [],
+          rating: p.averageRating ?? 0,
+          reviews: p.totalReviews ?? 0,
+          features: p.features || [],
+          flipkartLink: p.flipkartLink || null,
         });
-        setReviews(reviewsData);
+        setReviews(res.reviews || []);
       })
-      .catch((err) => {
-        if (!mounted) return;
-        setError(err.message || String(err));
-      })
-      .finally(() => mounted && setLoading(false));
-
-    return () => (mounted = false);
+      .catch((err) => setError(err.message))
+      .finally(() => setLoading(false));
   }, [id]);
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
+  if (loading)
+    return <div className="min-h-screen flex items-center justify-center">Loading…</div>;
   if (error)
-    return (
-      <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>
-    );
-  if (!product) {
-    return (
-      <div className="min-h-screen flex items-center justify-center text-xl font-semibold">
-        Product not found ❌
-      </div>
-    );
-  }
+    return <div className="min-h-screen flex items-center justify-center text-red-500">{error}</div>;
+  if (!product)
+    return <div className="min-h-screen flex items-center justify-center">Product not found</div>;
 
-  const isWishlisted = wishlist.some(
-    (item) => item.id === product.id
-  );
+  const isWishlisted = wishlist.some((item) => item.id === product.id);
 
-  // ✅ TOGGLE WISHLIST
   const toggleWishlist = () => {
     isWishlisted
       ? removeFromWishlist(product.id)
       : addToWishlist(product);
   };
 
+  const handleBuyNow = () => {
+    addToCart(product);
+    navigate("/cart");
+  };
+
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    if (!reviewRating || !reviewComment.trim()) return;
+    if (!reviewComment.trim()) return;
 
     setSubmittingReview(true);
     try {
       await productAPI.addReview(id, {
         rating: reviewRating,
-        comment: reviewComment.trim()
+        comment: reviewComment,
       });
-      
-      // Refresh product data to get updated reviews
+      toast.success("Thank you for your review 💕");
+
       const res = await productAPI.getProduct(id);
-      const p = res.product;
-      const reviewsData = res.reviews || [];
-      
-      setProduct(prev => ({
-        ...prev,
-        rating: p.averageRating,
-        reviews: p.totalReviews
-      }));
-      setReviews(reviewsData);
-      
-      // Reset form
-      setReviewRating(5);
-      setReviewComment('');
+      setReviews(res.reviews || []);
       setShowReviewForm(false);
-    } catch (error) {
-      console.error('Failed to submit review:', error);
-      toast.error('Failed to submit review. Please try again.');
+      setReviewComment("");
+      setReviewRating(5);
+    } catch {
+      toast.error("Failed to submit review");
     } finally {
       setSubmittingReview(false);
     }
   };
 
   return (
-    <div className="min-h-screen px-4 sm:px-6 py-10 max-w-6xl mx-auto">
-      {/* BACK */}
-      <button
-        onClick={() => navigate(-1)}
-        className="flex items-center gap-2 mb-6 text-gray-600 hover:text-black"
-      >
-        <ArrowLeft size={18} /> Back
-      </button>
+    <div className="min-h-screen bg-[#fff9fb] py-10 px-4 sm:px-6">
+      <div className="max-w-6xl mx-auto">
 
-      <div className="grid md:grid-cols-2 gap-10 md:gap-14">
-        {/* IMAGE GALLERY */}
-        <div className="bg-gray-100 p-6 sm:p-10 rounded-3xl">
-          <div className="flex flex-col items-center">
-            {/* Main Image */}
-            <img
-              src={product.images?.[selectedImage]?.url || product.image || "/placeholder.png"}
-              alt={product.name}
-              className="w-full max-h-[400px] object-contain mb-4"
-            />
-            {/* Thumbnails */}
-            {product.images && product.images.length > 1 && (
-              <div className="flex gap-2 overflow-x-auto">
-                {product.images.map((img, index) => (
-                  <img
-                    key={index}
-                    src={img.url}
-                    alt={`${product.name} ${index + 1}`}
-                    className={`w-16 h-16 object-cover rounded cursor-pointer border-2 ${
-                      selectedImage === index ? 'border-pink-600' : 'border-gray-300'
-                    }`}
-                    onClick={() => setSelectedImage(index)}
-                  />
-                ))}
+        {/* BACK */}
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-gray-500 hover:text-black mb-6"
+        >
+          <ArrowLeft size={18} /> Back
+        </button>
+
+        {/* ================= MAIN SECTION ================= */}
+        <div className="grid md:grid-cols-2 gap-10 items-start">
+
+          {/* 🌸 IMAGE SECTION */}
+          <div className="flex items-start">
+            <div className="relative w-full max-w-xl">
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-rose-50 via-pink-50 to-purple-50" />
+              <div className="relative p-5">
+                <img
+                  src={product.images[selectedImage]?.url || "/placeholder.png"}
+                  alt={product.name}
+                  className="w-full max-h-[420px] object-contain mx-auto"
+                />
+
+                {product.images.length > 1 && (
+                  <div className="flex justify-center gap-2 mt-4">
+                    {product.images.map((img, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setSelectedImage(i)}
+                        className={`w-16 h-16 rounded-lg overflow-hidden ${
+                          selectedImage === i
+                            ? "ring-2 ring-pink-400"
+                            : "opacity-70 hover:opacity-100"
+                        }`}
+                      >
+                        <img src={img.url} alt="" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
+            </div>
+          </div>
+
+          {/* ================= DETAILS ================= */}
+          <div className="flex flex-col">
+            <h1 className="text-3xl sm:text-4xl font-semibold mb-3">
+              {product.name}
+            </h1>
+
+            <div className="flex items-center gap-2 mb-4">
+              <Star className="fill-yellow-400 text-yellow-400" />
+              <span className="font-medium">{product.rating}</span>
+              <span className="text-gray-500">
+                ({product.reviews} reviews)
+              </span>
+            </div>
+
+            <p className="text-3xl font-bold text-pink-600 mb-6">
+              ₹{product.salePrice}
+            </p>
+
+            <div className="grid grid-cols-2 gap-3 mb-6 text-sm text-gray-700">
+              {["Authentic Product", "Safe Delivery", "Easy Returns", "Women-Friendly Design"].map(
+                (t, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <CheckCircle size={16} className="text-pink-500" />
+                    {t}
+                  </div>
+                )
+              )}
+            </div>
+
+            {/* FEATURES */}
+            {product.features.length > 0 && (
+              <>
+                <h3 className="text-lg font-semibold mb-3">
+                  Why you’ll love it
+                </h3>
+                <ul className="space-y-2 text-gray-700 mb-8">
+                  {product.features.map((f, i) => (
+                    <li key={i}>• {f}</li>
+                  ))}
+                </ul>
+              </>
             )}
-          </div>
-        </div>
 
-        {/* DETAILS */}
-        <div className="flex flex-col">
-          <h1 className="text-3xl sm:text-4xl font-bold mb-4">
-            {product.name}
-          </h1>
+            {/* ACTION BUTTONS */}
+            <div className="flex flex-col gap-4 mt-auto">
 
-          {/* RATING */}
-          <div className="flex items-center gap-2 mb-4">
-            <Star className="fill-yellow-400 text-yellow-400" />
-            <span className="font-semibold">
-              {product.rating ?? 0}
-            </span>
-            <span className="text-gray-500">
-              ({product.reviews ?? 0} reviews)
-            </span>
-          </div>
+              {/* BUY NOW */}
+              <button
+                onClick={handleBuyNow}
+                className="w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl bg-gradient-to-r from-pink-500 to-purple-600 text-white font-semibold hover:shadow-lg"
+              >
+                <Zap size={18} /> Buy Now
+              </button>
 
-          {/* PRICE */}
-          <p className="text-2xl sm:text-3xl font-bold text-pink-600 mb-6">
-            ₹{product.salePrice}
-          </p>
+              {/* BUY FROM FLIPKART */}
+              {product.flipkartLink && (
+                <a
+                  href={product.flipkartLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="
+                    w-full flex items-center justify-center gap-2
+                    px-6 py-4 rounded-xl
+                    border border-blue-500 text-blue-600
+                    font-semibold
+                    hover:bg-blue-50 transition
+                  "
+                >
+                  <ExternalLink size={18} />
+                  Buy from Flipkart
+                </a>
+              )}
 
-          {/* FEATURES */}
-          {product.features && (
-            <>
-              <h3 className="font-semibold text-lg sm:text-xl mb-3">
-                Features
-              </h3>
-              <ul className="space-y-2 mb-8 text-gray-700">
-                {product.features.map((f, i) => (
-                  <li key={i}>• {f}</li>
-                ))}
-              </ul>
-            </>
-          )}
-
-          {/* ACTION BUTTONS */}
-          <div className="flex flex-col sm:flex-row gap-4 mt-auto w-full">
-            {/* BUY NOW */}
-            <button
-              onClick={handleBuyNow}
-              className="
-                w-full sm:w-auto
-                flex items-center justify-center gap-2
-                px-6 sm:px-10 py-4
-                rounded-xl font-semibold
-                transition-all duration-200
-                bg-gradient-to-r from-pink-500 to-purple-600 text-white hover:scale-[1.02] hover:shadow-lg active:scale-95
-              "
-            >
-              <Zap size={20} />
-              Buy Now
-            </button>
-
-            {/* WISHLIST */}
-            <button
-              onClick={toggleWishlist}
-              className={`
-                w-full sm:w-auto
-                flex items-center justify-center gap-2
-                px-6 sm:px-10 py-4
-                rounded-xl font-semibold border
-                transition-all
-                ${
+              {/* WISHLIST */}
+              <button
+                onClick={toggleWishlist}
+                className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-xl border font-semibold ${
                   isWishlisted
                     ? "bg-pink-100 text-pink-600 border-pink-300"
                     : "border-pink-500 text-pink-600 hover:bg-pink-50"
-                }
-              `}
-            >
-              <Heart
-                size={20}
-                className={
-                  isWishlisted ? "fill-pink-600" : ""
-                }
-              />
-              {isWishlisted
-                ? "Remove from Wishlist"
-                : "Add to Wishlist"}
-            </button>
-
-            {/* FLIPKART LINK */}
-            {product.flipkartLink && (
-              <a
-                href={product.flipkartLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="
-                  w-full sm:w-auto
-                  flex items-center justify-center gap-2
-                  px-6 sm:px-10 py-4
-                  rounded-xl font-semibold
-                  bg-yellow-400 text-blue-900
-                  hover:bg-yellow-500 hover:shadow-lg transition-all
-                "
+                }`}
               >
-                <img 
-                  src="https://img1a.flixcart.com/www/linchpin/fk-cp-zion/img/flipkart-plus_8d85f4.png" 
-                  alt="" 
-                  className="h-5 object-contain"
-                  onError={(e) => { e.target.style.display = 'none'; }} 
-                />
-                Shop on Flipkart
-              </a>
-            )}
-        </div>
-      </div>      </div>
-      {/* REVIEWS SECTION */}
-      <div className="mt-12">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold">Customer Reviews ({reviews.length})</h2>
-          {user && (
-            <button
-              onClick={() => setShowReviewForm(!showReviewForm)}
-              className="bg-pink-600 text-white px-4 py-2 rounded-lg hover:bg-pink-700 transition"
-            >
-              {showReviewForm ? 'Cancel' : 'Write a Review'}
-            </button>
-          )}
-        </div>
-
-        {/* REVIEW FORM */}
-        {showReviewForm && user && (
-          <div className="bg-gray-50 p-6 rounded-lg mb-8">
-            <h3 className="text-lg font-semibold mb-4">Write Your Review</h3>
-            <form onSubmit={handleSubmitReview}>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Rating</label>
-                <div className="flex gap-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <button
-                      key={star}
-                      type="button"
-                      onClick={() => setReviewRating(star)}
-                      className="text-2xl"
-                    >
-                      <Star
-                        className={star <= reviewRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
-                      />
-                    </button>
-                  ))}
-                </div>
-              </div>
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Comment</label>
-                <textarea
-                  value={reviewComment}
-                  onChange={(e) => setReviewComment(e.target.value)}
-                  className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                  rows="4"
-                  placeholder="Share your thoughts about this product..."
-                  required
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={submittingReview}
-                className="bg-pink-600 text-white px-6 py-2 rounded-lg hover:bg-pink-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {submittingReview ? 'Submitting...' : 'Submit Review'}
+                <Heart size={18} className={isWishlisted ? "fill-pink-600" : ""} />
+                {isWishlisted ? "Wishlisted" : "Add to Wishlist"}
               </button>
-            </form>
-          </div>
-        )}
 
-        {/* REVIEWS LIST */}
-        <div className="space-y-6">
-          {reviews.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No reviews yet. Be the first to review this product!</p>
-          ) : (
-            reviews.map((review) => (
-              <div key={review._id} className="border-b pb-6">
-                <div className="flex items-center gap-2 mb-2">
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <Star
-                        key={star}
-                        size={16}
-                        className={star <= review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"}
-                      />
-                    ))}
-                  </div>
-                  <span className="font-semibold">{review.user?.name || 'Anonymous'}</span>
-                  <span className="text-gray-500 text-sm">
-                    {new Date(review.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-                <p className="text-gray-700">{review.comment}</p>
-              </div>
-            ))
+            </div>
+          </div>
+        </div>
+
+        {/* ================= REVIEWS ================= */}
+        <div className="mt-16 bg-white rounded-3xl p-8 shadow-sm">
+          <h2 className="text-2xl font-semibold mb-6">
+            Customer Reviews ({reviews.length})
+          </h2>
+
+          {reviews.length === 0 && (
+            <p className="text-gray-500 text-center">
+              No reviews yet. Be the first 💕
+            </p>
           )}
         </div>
+
       </div>
     </div>
   );

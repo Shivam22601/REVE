@@ -23,6 +23,7 @@ import Shop from "./components/NavbarLinks/Shop";
 import Support from "./components/NavbarLinks/Support";
 import Cart from "./components/NavbarLinks/Cart";
 import Wishlist from "./components/NavbarLinks/Wishlist";
+import Feedback from "./components/NavbarLinks/Feedback";
 
 /* ================= SHOP PAGES ================= */
 import Earbuds from "./components/ShopLinks/Earbuds";
@@ -91,6 +92,7 @@ const App = () => {
             <Route path="/aboutAs" element={<About />} />
             <Route path="/shop" element={<Shop />} />
             <Route path="/support" element={<Support />} />
+            <Route path="/feedback" element={<Feedback />} />
             <Route path="/cart" element={<Cart />} />
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/profile" element={<Profile />} />

@@ -6,11 +6,64 @@ import { productAPI } from "../../config/api";
 // 🎥 VIDEOS
 import video1 from "../../assets/v1.mp4";
 import video2 from "../../assets/v2.mp4";
-import video3 from "../../assets/v3.mp4"; 
+import video3 from "../../assets/v3.mp4";
+
+/* ================= PRODUCT ANIMATIONS ================= */
+const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.15,
+    },
+  },
+};
+
+const cardVariants = {
+  hidden: {
+    opacity: 0,
+    y: 60,
+    scale: 0.95,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.6,
+      ease: "easeOut",
+    },
+  },
+};
+
+/* ================= VIDEO ANIMATIONS ================= */
+const videoContainerVariants = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.2,
+    },
+  },
+};
+
+const videoCardVariants = {
+  hidden: {
+    opacity: 0,
+    y: 80,
+    scale: 0.92,
+  },
+  visible: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: {
+      duration: 0.8,
+      ease: "easeOut",
+    },
+  },
+};
 
 export default function FeaturedProduct() {
-  const Motion = motion;
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -18,11 +71,12 @@ export default function FeaturedProduct() {
   useEffect(() => {
     let mounted = true;
     setLoading(true);
+
     productAPI
-      .getProducts({ limit: 8, sort: 'sortOrder -createdAt _id' })
+      .getProducts({ limit: 8, sort: "sortOrder -createdAt _id" })
       .then((res) => {
         if (!mounted) return;
-        setItems((res && res.data) || []);
+        setItems(res?.data || []);
       })
       .catch((err) => {
         if (!mounted) return;
@@ -33,61 +87,73 @@ export default function FeaturedProduct() {
     return () => (mounted = false);
   }, []);
 
-  const normalize = (p) => ({
-    id: p._id,
-    name: p.name,
-    salePrice: p.salePrice ?? p.price,
-    image: p.images?.[0]?.url || "/placeholder.png",
-  });
+  // 🔹 SPLIT PRODUCTS
+  const row1 = items.slice(0, 2);
+  const row2 = items.slice(2, 5);
+  const row3 = items.slice(5, 7);
 
   return (
     <div className="w-full mt-10 px-6 py-10">
 
       {/* ================= FEATURED PRODUCTS ================= */}
-      <h1 className="text-4xl font-bold mb-10">Recommended</h1>
+      <h1 className="text-4xl font-bold mb-14">Recommended</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
-        {loading && <div className="text-center">Loading...</div>}
-        {!loading && error && <div className="text-red-500">{error}</div>}
-        {!loading && !error && items.map((item) => {
-          const it = normalize(item);
-          return (
-            <Motion.div
-              key={it.id}
-              onClick={() => navigate(`/product/${it.id}`)}
-              className="group p-6 rounded-xl border bg-white cursor-pointer"
-              whileHover={{ y: -6 }}
-            >
-              <div className="w-full h-40 flex items-center justify-center mb-4">
-                <img
-                  src={it.image}
-                  alt={it.name}
-                  className="w-full h-full object-contain"
-                />
-              </div>
+      {loading && <div className="text-center">Loading...</div>}
+      {!loading && error && <div className="text-red-500">{error}</div>}
 
-              <p className="text-lg font-semibold">{it.name}</p>
+      {!loading && !error && (
+        <div className="space-y-16">
 
-              <p className="text-md font-bold mt-2 text-pink-600">
-                Rs. {it.salePrice}
-              </p>
+          {/* ROW 1 */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-10"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.3 }}
+          >
+            {row1.map((item) => (
+              <ProductCard key={item._id} item={item} />
+            ))}
+          </motion.div>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  navigate(`/product/${it.id}`);
-                }}
-                className="hidden group-hover:block w-full mt-3 py-2 rounded-lg font-semibold border hover:bg-black hover:text-white"
-              >
-                VIEW DETAILS
-              </button>
-            </Motion.div>
-          );
-        })}
-      </div>
+          {/* ROW 2 */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.3 }}
+          >
+            {row2.map((item) => (
+              <ProductCard key={item._id} item={item} />
+            ))}
+          </motion.div>
 
-      {/* ================= 3 VIDEO SECTIONS (SIDE BY SIDE) ================= */}
-      <div className="mt-24 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {/* ROW 3 */}
+          <motion.div
+            className="grid grid-cols-1 sm:grid-cols-2 gap-10"
+            variants={containerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: false, amount: 0.3 }}
+          >
+            {row3.map((item) => (
+              <ProductCard key={item._id} item={item} />
+            ))}
+          </motion.div>
+
+        </div>
+      )}
+
+      {/* ================= VIDEO SECTION ================= */}
+      <motion.div
+        className="mt-28 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8"
+        variants={videoContainerVariants}
+        initial="hidden"
+        whileInView="visible"
+        viewport={{ once: false, amount: 0.3 }}
+      >
 
         <VideoCard
           video={video1}
@@ -110,18 +176,65 @@ export default function FeaturedProduct() {
           onClick={() => navigate("/shop")}
         />
 
-      </div>
-
+      </motion.div>
     </div>
   );
 }
 
-/* ================= VIDEO CARD COMPONENT ================= */
+/* ================= PRODUCT CARD ================= */
+function ProductCard({ item }) {
+  const navigate = useNavigate();
+
+  const product = {
+    id: item._id,
+    name: item.name,
+    price: item.salePrice ?? item.price,
+    image: item.images?.[0]?.url || "/placeholder.png",
+  };
+
+  return (
+    <motion.div
+      variants={cardVariants}
+      onClick={() => navigate(`/product/${product.id}`)}
+      className="group p-6 rounded-2xl border bg-white cursor-pointer"
+      whileHover={{ y: -8 }}
+    >
+      <div className="w-full h-56 flex items-center justify-center mb-6">
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-full object-contain"
+        />
+      </div>
+
+      <p className="text-lg font-semibold">{product.name}</p>
+
+      <p className="text-lg font-bold mt-2 text-pink-600">
+        Rs. {product.price}
+      </p>
+
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          navigate(`/product/${product.id}`);
+        }}
+        className="hidden group-hover:block w-full mt-4 py-2 rounded-lg font-semibold border hover:bg-black hover:text-white transition"
+      >
+        VIEW DETAILS
+      </button>
+    </motion.div>
+  );
+}
+
+/* ================= VIDEO CARD ================= */
 function VideoCard({ video, title, subtitle, onClick }) {
   return (
-    <div className="relative h-[260px] rounded-2xl overflow-hidden bg-black group">
-
-      {/* 🎥 VIDEO */}
+    <motion.div
+      variants={videoCardVariants}
+      className="relative h-[260px] rounded-2xl overflow-hidden bg-black group cursor-pointer"
+      whileHover={{ scale: 1.03 }}
+      onClick={onClick}
+    >
       <video
         src={video}
         autoPlay
@@ -138,22 +251,16 @@ function VideoCard({ video, title, subtitle, onClick }) {
         "
       />
 
-      {/* OVERLAY */}
-      <div className="absolute inset-0 bg-black/45 group-hover:bg-black/55 transition" />
+      <div className="absolute inset-0 bg-black/45 group-hover:bg-black/60 transition" />
 
-      {/* CONTENT */}
       <div className="relative z-10 h-full flex flex-col justify-center px-6 text-white">
         <h3 className="text-2xl font-bold mb-2">{title}</h3>
         <p className="text-white/80 mb-4">{subtitle}</p>
 
-        <button
-          onClick={onClick}
-          className="w-fit px-5 py-2 bg-white text-black rounded-lg font-semibold hover:scale-105 transition"
-        >
+        <button className="w-fit px-5 py-2 bg-white text-black rounded-lg font-semibold hover:scale-105 transition">
           SHOP NOW
         </button>
       </div>
-
-    </div>
+    </motion.div>
   );
 }

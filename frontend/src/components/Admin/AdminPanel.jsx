@@ -20,6 +20,7 @@ const AdminPanel = () => {
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [feedback, setFeedback] = useState([]);
   const [activeTab, setActiveTab] = useState('dashboard');
   const [loading, setLoading] = useState(true);
   const [showAddProduct, setShowAddProduct] = useState(false);
@@ -105,12 +106,26 @@ const AdminPanel = () => {
     }
   }, [logout, navigate]);
 
+  const loadFeedback = useCallback(async () => {
+    try {
+      const data = await adminAPI.getFeedback();
+      setFeedback(Array.isArray(data) ? data.filter(Boolean) : []);
+    } catch (error) {
+      console.error('Failed to load feedback:', error);
+      if (/(jwt|Authentication|required|Session expired)/i.test(error.message)) {
+        logout();
+        navigate('/login');
+      }
+    }
+  }, [logout, navigate]);
+
   useEffect(() => { 
     if (activeTab === 'users') loadUsers();
     if (activeTab === 'orders') loadOrders();
     if (activeTab === 'products') loadProducts();
     if (activeTab === 'categories') loadCategories();
-  }, [activeTab, loadUsers, loadOrders, loadProducts, loadCategories]);
+    if (activeTab === 'feedback') loadFeedback();
+  }, [activeTab, loadUsers, loadOrders, loadProducts, loadCategories, loadFeedback]);
 
   const handleBlockUser = async (userId, block) => {
     try {
@@ -264,6 +279,14 @@ const AdminPanel = () => {
             }`}
           >
             Manual
+          </button>
+          <button
+            onClick={() => setActiveTab('feedback')}
+            className={`w-full text-left px-4 py-2 rounded-lg transition ${
+              activeTab === 'feedback' ? 'bg-pink-50 text-pink-600' : 'text-gray-600 hover:bg-gray-50'
+            }`}
+          >
+            Feedback
           </button>
           <button
             onClick={() => {
@@ -478,6 +501,35 @@ const AdminPanel = () => {
         {activeTab === 'pincodes' && <PincodeManager />}
 
         {activeTab === 'manual' && <ManualEditor />}
+        {activeTab === 'feedback' && (
+          <div className="space-y-6">
+            <h2 className="text-2xl font-bold text-gray-800">Feedback</h2>
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              <table className="w-full text-left">
+                <thead className="bg-gray-50 border-b">
+                  <tr>
+                    <th className="px-6 py-4 font-medium text-gray-500">Name</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Email</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Age</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Occupation</th>
+                    <th className="px-6 py-4 font-medium text-gray-500">Submitted</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {feedback.map((f) => (
+                    <tr key={f._id} className="hover:bg-gray-50">
+                      <td className="px-6 py-4">{f.name || '—'}</td>
+                      <td className="px-6 py-4">{f.email || '—'}</td>
+                      <td className="px-6 py-4">{f.ageGroup || '—'}</td>
+                      <td className="px-6 py-4">{f.occupation || '—'}</td>
+                      <td className="px-6 py-4">{f.createdAt ? new Date(f.createdAt).toLocaleString() : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
 
         {activeTab === 'products' && (
           <div className="space-y-6">

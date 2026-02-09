@@ -26,6 +26,7 @@ const {
   createCategory
 } = require('../controllers/productController');
 const { updateOrderStatus, updateOrderDetails, updateOrderAddress } = require('../controllers/orderController');
+const { getAllFeedback } = require('../controllers/feedbackController');
 const validateRequest = require('../middlewares/validateRequest');
 
 const router = express.Router();
@@ -66,6 +67,9 @@ router.post('/manuals', upload.array('images', 5), [body('productId').notEmpty()
 router.get('/manuals/:id', getManual);
 router.put('/manuals/:id', upload.array('images', 5), validateRequest, updateManual);
 router.delete('/manuals/:id', deleteManual);
+
+// Feedback routes
+router.get('/feedback', getAllFeedback);
 
 module.exports = router;
 

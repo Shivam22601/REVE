@@ -26,6 +26,7 @@ try {
 }
 const adminRoutes = require('./routes/adminRoutes');
 const pincodeRoutes = require('./routes/pincodeRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
 
 const app = express();
 
@@ -99,6 +100,7 @@ if (paymentRoutes) {
 }
 app.use('/api/admin', adminRoutes);
 app.use('/api/pincodes', pincodeRoutes);
+app.use('/api/feedback', feedbackRoutes);
 
 const frontendPath = path.join(__dirname, '../frontend/dist');
 app.use(express.static(frontendPath, { maxAge: '1d', etag: true, immutable: true }));
