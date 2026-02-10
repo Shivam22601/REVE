@@ -7,6 +7,11 @@ import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./components/LandingPage/CartContext";
 import { WishlistProvider } from "./components/LandingPage/WishlistContext";
 
+<div className="bg-black text-white text-center py-2 text-xs md:text-sm font-medium tracking-widest uppercase">
+   🇮🇳 India's First Women's Tech Brand
+</div>
+<Navbar2 />
+
 /* ================= LAYOUT ================= */
 import Navbar2 from "./components/LandingPage/Navbar2";
 import Footer from "./components/LandingPage/Footer";
