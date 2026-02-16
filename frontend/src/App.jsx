@@ -60,7 +60,7 @@ const App = () => {
       <WishlistProvider>
         <Router>
           <div className="bg-black text-white text-center py-2 text-xs md:text-sm font-medium tracking-widest uppercase relative z-[1000]">
-            🇮🇳 India's First Women's Tech Brand
+            India's First Women's Tech Brand
           </div>
           {/* ================= NAVBAR (GLOBAL) ================= */}
           <Navbar2 />
