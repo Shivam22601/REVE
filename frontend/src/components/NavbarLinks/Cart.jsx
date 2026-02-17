@@ -135,7 +135,7 @@ export default function Cart() {
                 </h3>
 
                 <p className="text-pink-600 font-bold mt-1">
-                  ₹{item.salePrice}
+                  ₹{(item.salePrice || 0).toFixed(2)}
                 </p>
 
                 <div className="flex items-center gap-4 mt-4">
@@ -180,7 +180,7 @@ export default function Cart() {
 
           <div className="flex justify-between mb-2">
             <span>Subtotal</span>
-            <span>₹{totalAmount}</span>
+            <span>₹{(totalAmount || 0).toFixed(2)}</span>
           </div>
 
           {/* 🎫 REFERRAL CODE SECTION */}
@@ -269,7 +269,7 @@ export default function Cart() {
             )}
             {referralDiscount > 0 && (
               <p className="text-green-600 text-sm mt-1">
-                ✓ Referral discount applied: ₹{referralDiscount}
+                ✓ Referral discount applied: ₹{(referralDiscount || 0).toFixed(2)}
               </p>
             )}
           </div>
@@ -277,28 +277,28 @@ export default function Cart() {
           {cartSummary?.gstAmount > 0 && (
             <div className="flex justify-between mb-2">
               <span>Tax (GST {cartSummary.gstPercent}%)</span>
-              <span>₹{cartSummary.gstAmount}</span>
+              <span>₹{(cartSummary.gstAmount || 0).toFixed(2)}</span>
             </div>
           )}
 
           {cartSummary?.shipping > 0 && (
             <div className="flex justify-between mb-2">
               <span>Shipping</span>
-              <span>₹{cartSummary.shipping}</span>
+              <span>₹{(cartSummary.shipping || 0).toFixed(2)}</span>
             </div>
           )}
 
           {cartSummary?.discount > 0 && (
             <div className="flex justify-between mb-2 text-green-600">
               <span>Discount</span>
-              <span>-₹{cartSummary.discount}</span>
+              <span>-₹{(cartSummary.discount || 0).toFixed(2)}</span>
             </div>
           )}
 
           <div className="flex justify-between mb-4">
             <span>Total Amount</span>
             <span className="font-bold text-pink-600">
-              ₹{finalAmount}
+              ₹{(finalAmount || 0).toFixed(2)}
             </span>
           </div>
 

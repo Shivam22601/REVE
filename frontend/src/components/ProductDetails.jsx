@@ -163,7 +163,7 @@ export default function ProductDetails() {
             </div>
 
             <p className="text-3xl font-bold text-pink-600 mb-6">
-              ₹{product.salePrice}
+              ₹{(product.salePrice || 0).toFixed(2)}
             </p>
 
             <div className="grid grid-cols-2 gap-3 mb-6 text-sm text-gray-700">

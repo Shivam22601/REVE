@@ -167,7 +167,7 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
             <h3 className="font-medium border-b pb-1">Payment</h3>
             <p><b>Method:</b> {order.payment?.provider}</p>
             <p><b>Status:</b> {order.payment?.status}</p>
-            <p><b>Amount:</b> ₹{order.payment?.amount}</p>
+            <p><b>Amount:</b> ₹{(order.payment?.amount || 0).toFixed(2)}</p>
           </div>
         </div>
 
@@ -187,9 +187,9 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
               {order.items.map((item, i) => (
                 <tr key={i}>
                   <td className="p-2">{item.product?.name || 'Unknown Product'}</td>
-                  <td className="p-2 text-center">₹{item.price}</td>
+                  <td className="p-2 text-center">₹{(item.price || 0).toFixed(2)}</td>
                   <td className="p-2 text-center">{item.quantity}</td>
-                  <td className="p-2 text-center">₹{item.price * item.quantity}</td>
+                  <td className="p-2 text-center">₹{((item.price || 0) * item.quantity).toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -210,14 +210,14 @@ const OrderDetailsModal = ({ order, onClose, onUpdate, isAdmin = false }) => {
                     className="w-20 text-right border px-1 rounded"
                   />
                 ) : (
-                  <span>₹{order.totals?.[key] || 0}</span>
+                  <span>₹{(order.totals?.[key] || 0).toFixed(2)}</span>
                 )}
               </div>
             ))}
 
             <div className="flex justify-between font-semibold border-t pt-2">
               <span>Grand Total</span>
-              <span>₹{isEditing ? editedOrder.totals.grandTotal : order.totals?.grandTotal}</span>
+              <span>₹{(isEditing ? editedOrder.totals.grandTotal : order.totals?.grandTotal || 0).toFixed(2)}</span>
             </div>
           </div>
         </div>

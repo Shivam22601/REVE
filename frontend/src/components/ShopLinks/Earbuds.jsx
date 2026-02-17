@@ -74,7 +74,7 @@ export default function Earbuds() {
               <div className="p-6">
                 <h3 className="text-lg font-semibold">{item.name}</h3>
                 <p className="text-gray-500 mt-1">
-                  ₹{item.salePrice.toLocaleString()}
+                  ₹{(item.salePrice || 0).toFixed(2)}
                 </p>
 
                 <button className="mt-4 bg-gradient-to-r from-purple-600 to-pink-500 text-white w-full py-3 rounded-full font-medium hover:opacity-90 transition">

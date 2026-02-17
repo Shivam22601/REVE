@@ -320,7 +320,7 @@ const AdminPanel = () => {
               </div>
               <div className="bg-white p-6 rounded-xl shadow-sm">
                 <h3 className="text-gray-500 text-sm font-medium">Revenue</h3>
-                <p className="text-3xl font-bold mt-2">₹{(dashboard.totals?.revenue ?? 0).toLocaleString()}</p>
+                <p className="text-3xl font-bold mt-2">₹{((dashboard.totals?.revenue ?? 0) || 0).toFixed(2)}</p>
               </div>
             </div>
           </div>
@@ -431,7 +431,7 @@ const AdminPanel = () => {
                         <option value="cancelled">Cancelled</option>
                         <option value="returned">Returned</option>
                       </select>
-                      <span className="font-bold text-lg">₹{order.totals?.grandTotal || order.payment?.amount || 0}</span>
+                      <span className="font-bold text-lg">₹{((order.totals?.grandTotal || order.payment?.amount || 0) || 0).toFixed(2)}</span>
                     </div>
                   </div>
                   <div className="space-y-2">
@@ -575,7 +575,7 @@ const AdminPanel = () => {
                   </div>
                   <h3 className="font-medium text-gray-900 truncate">{p.name}</h3>
                   <div className="flex justify-between items-center mt-2">
-                    <span className="text-pink-600 font-bold">₹{p.price}</span>
+                    <span className="text-pink-600 font-bold">₹{(p.price || 0).toFixed(2)}</span>
                     <span className="text-sm text-gray-500">Stock: {p.stock}</span>
                   </div>
                 </div>

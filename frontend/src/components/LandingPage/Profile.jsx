@@ -227,8 +227,8 @@ export default function Profile() {
                       <div className="text-sm text-gray-500">{order.createdAt ? new Date(order.createdAt).toLocaleString() : '—'}</div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">₹{(order.totals?.grandTotal ?? order.payment?.amount ?? 0).toLocaleString()}</div>
-                      <div className="text-xs text-gray-500 mt-1">Tax: ₹{(order.totals?.tax ?? 0).toLocaleString()}</div>
+                      <div className="font-semibold">₹{((order.totals?.grandTotal ?? order.payment?.amount ?? 0) || 0).toFixed(2)}</div>
+                      <div className="text-xs text-gray-500 mt-1">Tax: ₹{((order.totals?.tax ?? 0) || 0).toFixed(2)}</div>
                       <div className="text-sm mt-1">
                         <span className={`px-2 py-1 rounded text-sm ${
                           order.status === 'delivered' ? 'bg-green-100 text-green-700' :
@@ -246,7 +246,7 @@ export default function Profile() {
                     {order.items.map((item, idx) => (
                       <div key={idx} className="flex justify-between">
                         <div>{item.product?.name || 'Unknown Product'} x{item.quantity}</div>
-                        <div>₹{item.price * item.quantity}</div>
+                        <div>₹{((item.price || 0) * item.quantity).toFixed(2)}</div>
                       </div>
                     ))}
                   </div>

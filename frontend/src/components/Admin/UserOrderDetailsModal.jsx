@@ -163,7 +163,7 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
             <h3 className="font-medium border-b pb-1">Payment</h3>
             <p><b>Method:</b> {order.payment?.provider}</p>
             <p><b>Status:</b> {order.payment?.status}</p>
-            <p><b>Amount:</b> ₹{order.payment?.amount}</p>
+            <p><b>Amount:</b> ₹{(order.payment?.amount || 0).toFixed(2)}</p>
           </div>
         </div>
 
@@ -194,10 +194,10 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
                       <span>{item.product?.name || 'Unknown Product'}</span>
                     </div>
                   </td>
-                  <td className="p-2 text-center">₹{item.price}</td>
+                  <td className="p-2 text-center">₹{(item.price || 0).toFixed(2)}</td>
                   <td className="p-2 text-center">{item.quantity}</td>
                   <td className="p-2 text-center">
-                    ₹{item.price * item.quantity}
+                    ₹{((item.price || 0) * item.quantity).toFixed(2)}
                   </td>
                 </tr>
               ))}
@@ -210,25 +210,25 @@ const UserOrderDetailsModal = ({ order, onClose, onUpdate }) => {
           <div className="w-72 bg-gray-50 p-4 rounded text-sm space-y-2">
             <div className="flex justify-between">
               <span>Subtotal</span>
-              <span>₹{order.totals?.subtotal || 0}</span>
+              <span>₹{(order.totals?.subtotal || 0).toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Tax</span>
-              <span>₹{order.totals?.tax || 0}</span>
+              <span>₹{(order.totals?.tax || 0).toFixed(2)}</span>
             </div>
             <div className="flex justify-between">
               <span>Shipping</span>
-              <span>₹{order.totals?.shipping || 0}</span>
+              <span>₹{(order.totals?.shipping || 0).toFixed(2)}</span>
             </div>
             {order.totals?.discount > 0 && (
               <div className="flex justify-between text-green-600">
                 <span>Discount</span>
-                <span>-₹{order.totals.discount}</span>
+                <span>-₹{(order.totals.discount || 0).toFixed(2)}</span>
               </div>
             )}
             <div className="flex justify-between font-semibold border-t pt-2">
               <span>Grand Total</span>
-              <span>₹{order.totals?.grandTotal || 0}</span>
+              <span>₹{(order.totals?.grandTotal || 0).toFixed(2)}</span>
             </div>
           </div>
         </div>

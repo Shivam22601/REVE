@@ -67,7 +67,7 @@ const ProductCard = memo(
 
             {/* PRICE */}
             <p className="text-2xl font-bold mb-5 text-pink-600">
-              ₹{product.salePrice.toLocaleString()}
+              ₹{(product.salePrice || 0).toFixed(2)}
             </p>
 
             {/* ACTION BUTTONS */}
