@@ -97,7 +97,9 @@ export default function FeaturedProduct() {
 
       {/* ================= FEATURED PRODUCTS ================= */}
       <h1 className="text-4xl font-bold mb-14">Recommended</h1>
-
+      <div className="bg-black text-white text-center py-2 text-xs md:text-sm font-medium tracking-widest uppercase relative z-[1000]">
+        India's First Women's Tech Brand
+      </div>
       {loading && <div className="text-center">Loading...</div>}
       {!loading && error && <div className="text-red-500">{error}</div>}
 
